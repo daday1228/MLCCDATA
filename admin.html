@@ -8,108 +8,100 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg: #f4f8fc;
-  --surface: #ffffff;
-  --surface-muted: #eaf2fb;
-  --border: #d0e4f5;
-  --border-strong: #a8cceb;
-  --text-primary: #0d1b2a;
-  --text-secondary: #3a5472;
-  --text-muted: #7a97b5;
-  --accent: #0099d9;
-  --accent-hover: #0075c2;
-  --accent-light: #cceef9;
-  --accent-soft: #eaf7fd;
-  --danger: #c0392b;
-  --warning: #e67e22;
-  --font-body: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
-  --font-mono: 'Pretendard Variable', Pretendard, monospace;
+  --bg:#f4f8fc; --surface:#fff; --surface-muted:#eaf2fb;
+  --border:#d0e4f5; --border-strong:#a8cceb;
+  --text-primary:#0d1b2a; --text-secondary:#3a5472; --text-muted:#7a97b5;
+  --accent:#0099d9; --accent-hover:#0075c2; --accent-light:#cceef9; --accent-soft:#eaf7fd;
+  --danger:#c0392b; --warning:#e67e22;
+  --font:'Pretendard Variable',Pretendard,-apple-system,sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--text-primary); background: var(--bg); -webkit-font-smoothing: antialiased; }
-body { background-image: radial-gradient(circle at 15% 0%, rgba(0,153,217,0.07) 0%, transparent 55%); min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);font-size:14px;line-height:1.6;color:var(--text-primary);background:var(--bg);-webkit-font-smoothing:antialiased;}
+body{background-image:radial-gradient(circle at 15% 0%,rgba(0,153,217,.07) 0%,transparent 55%);min-height:100vh;}
 
-.header { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 0 40px; box-shadow: 0 2px 12px rgba(0,153,217,0.08); }
-.header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 28px; height: 72px; }
-.brand { display: flex; align-items: center; gap: 14px; }
-.brand-logo { width: 52px; height: 52px; background: linear-gradient(135deg, #0099d9 0%, #42bdd8 100%); color: white; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-body); font-weight: 800; font-size: 13px; letter-spacing: -0.3px; line-height: 1.2; text-align: center; box-shadow: 0 4px 14px rgba(0,153,217,0.35); }
-.brand-text h1 { font-family: var(--font-body); font-weight: 700; font-size: 17px; letter-spacing: -0.3px; line-height: 1.25; }
-.brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
-.admin-badge { display: inline-block; padding: 2px 8px; background: var(--warning); color: white; font-size: 10px; font-weight: 700; border-radius: 4px; letter-spacing: 1px; text-transform: uppercase; margin-left: 8px; vertical-align: middle; }
+.header{background:var(--surface);border-bottom:2.5px solid var(--accent);padding:0 40px;box-shadow:0 2px 12px rgba(0,153,217,.08);}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--accent) 0%,#42bdd8 100%);color:#fff;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;line-height:1.2;text-align:center;box-shadow:0 4px 14px rgba(0,153,217,.35);}
+.brand-text h1{font-weight:700;font-size:16px;letter-spacing:-.3px;line-height:1.25;}
+.brand-text p{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.admin-badge{display:inline-block;padding:2px 8px;background:var(--warning);color:#fff;font-size:10px;font-weight:700;border-radius:4px;letter-spacing:1px;text-transform:uppercase;margin-left:8px;vertical-align:middle;}
+.db-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;}
+.db-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;}
+.db-badge.ok{background:#d4f5e9;color:#1a7a4a;}
+.db-badge.err{background:#fde8e8;color:var(--danger);}
+.db-badge.connecting{background:#fef3cd;color:#856404;}
 
-.btn { font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
-.btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
-.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn-danger { color: var(--danger); border-color: transparent; background: transparent; }
-.btn-danger:hover { background: rgba(192,57,43,0.07); }
-.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn{font-family:var(--font);font-size:13px;font-weight:500;padding:8px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+.btn:hover{background:var(--surface-muted);border-color:var(--border-strong);}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);}
+.btn-danger{color:var(--danger);border-color:transparent;background:transparent;}
+.btn-danger:hover{background:rgba(192,57,43,.07);}
+.btn-sm{padding:4px 10px;font-size:12px;}
 
-.main { max-width: 1200px; margin: 0 auto; padding: 32px 40px 80px; }
-.page-title { font-family: var(--font-body); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
-.page-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
-@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+.main{max-width:1200px;margin:0 auto;padding:32px 40px 80px;}
+.page-title{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
+.page-sub{color:var(--text-secondary);font-size:13px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.layout{display:grid;grid-template-columns:380px 1fr;gap:24px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}}
 
-.section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
-.section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed var(--border); }
-.section-num { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; }
-.section-title { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+.section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;}
+.section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px dashed var(--border);}
+.section-num{font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 8px;border-radius:4px;}
+.section-title{font-size:15px;font-weight:700;}
+.field-group{display:flex;flex-direction:column;gap:16px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.label{font-size:12px;font-weight:600;color:var(--text-secondary);}
+.label .unit{font-size:10px;color:var(--text-muted);margin-left:4px;font-weight:400;}
+.label .req{color:var(--danger);margin-left:2px;}
+.input,.select{font-family:var(--font);font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text-primary);width:100%;transition:all .15s;}
+.input:focus,.select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.input[readonly]{background:var(--surface-muted);color:var(--text-secondary);cursor:not-allowed;}
+.select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%233a5472' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.actions-bar{display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--border);margin-top:20px;}
 
-.field-group { display: flex; flex-direction: column; gap: 16px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.label { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.1px; }
-.label .unit { font-size: 10px; color: var(--text-muted); margin-left: 4px; font-weight: 400; }
-.label .required { color: var(--danger); margin-left: 2px; }
-.input, .select { font-family: var(--font-body); font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text-primary); width: 100%; transition: all 0.15s; }
-.input:focus, .select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.input[readonly] { background: var(--surface-muted); color: var(--text-secondary); cursor: not-allowed; }
-.select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%233a5472' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-.actions-bar { display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 20px; }
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tbl-toolbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface-muted);}
+.cnt{font-size:12px;color:var(--text-secondary);font-weight:600;}
+.srch{flex:1;max-width:280px;margin-left:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface-muted);white-space:nowrap;}
+th.ac{text-align:center;}
+td{padding:12px 14px;border-bottom:1px solid var(--border);}
+tbody tr{transition:background .1s;}
+tbody tr:hover{background:var(--accent-soft);}
+tbody tr:last-child td{border-bottom:none;}
+.cell-id{font-size:11px;color:var(--accent-hover);font-weight:600;}
+.cell-num{text-align:center;}
+.empty-st{padding:60px 20px;text-align:center;color:var(--text-muted);}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-hover);}
 
-.table-toolbar { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--surface-muted); border-radius: 12px 12px 0 0; }
-.table-toolbar .count { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
-.table-toolbar .search { flex: 1; max-width: 280px; margin-left: auto; }
-.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; font-weight: 700; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--surface-muted); white-space: nowrap; }
-td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
-tbody tr { transition: background 0.1s; }
-tbody tr:hover { background: var(--accent-soft); }
-tbody tr:last-child td { border-bottom: none; }
-.cell-id { font-size: 11px; color: var(--accent-hover); font-weight: 600; }
-.cell-num { text-align: center; }
-.empty-state { padding: 60px 20px; text-align: center; color: var(--text-muted); }
-.empty-state-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
-.badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 11px; font-weight: 600; background: var(--accent-light); color: var(--accent-hover); }
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text-primary);color:#fff;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:200;opacity:0;transform:translateY(10px);transition:all .2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.danger{background:var(--danger);}
+.toast.success{background:var(--accent);}
 
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text-primary); color: white; padding: 12px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.18); z-index: 200; opacity: 0; transform: translateY(10px); transition: all 0.2s; pointer-events: none; }
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.danger { background: var(--danger); }
-.toast.success { background: var(--accent); }
-
-#auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.auth-box { background: var(--surface); padding: 40px; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; width: 340px; border: 1px solid var(--border); }
-.auth-box h2 { font-family: var(--font-body); font-weight: 700; color: var(--accent); margin-bottom: 8px; font-size: 20px; }
-.auth-box p { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
-
-.db-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-flex; align-items: center; gap: 5px; }
-.db-status.ok { background: #d4f5e9; color: #1a7a4a; }
-.db-status.err { background: #fde8e8; color: var(--danger); }
-.db-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+/* AUTH OVERLAY */
+#auth-overlay{position:fixed;inset:0;background:rgba(13,27,42,.6);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.auth-box{background:var(--surface);padding:40px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.15);text-align:center;width:340px;border:1px solid var(--border);}
+.auth-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent) 0%,#42bdd8 100%);color:#fff;border-radius:12px;display:grid;place-items:center;margin:0 auto 18px;font-weight:800;font-size:13px;line-height:1.2;text-align:center;box-shadow:0 4px 14px rgba(0,153,217,.35);}
+.auth-box h2{font-weight:700;font-size:20px;color:var(--accent);margin-bottom:8px;}
+.auth-box p{color:var(--text-secondary);font-size:13px;margin-bottom:24px;}
 </style>
 </head>
 <body>
 
+<!-- 인증 오버레이 -->
 <div id="auth-overlay">
   <div class="auth-box">
-    <div style="width:52px;height:52px;background:linear-gradient(135deg,#0099d9,#42bdd8);border-radius:10px;display:grid;place-items:center;margin:0 auto 16px;color:white;font-weight:800;font-size:13px;line-height:1.2;text-align:center;box-shadow:0 4px 14px rgba(0,153,217,0.35);">ML<br>CC</div>
+    <div class="auth-logo">ML<br>CC</div>
     <h2>관리자 로그인</h2>
     <p>관리자 비밀번호를 입력하세요.</p>
     <div class="field" style="margin-bottom:20px;">
       <input type="password" id="admin-pw" class="input" placeholder="비밀번호" style="text-align:center;letter-spacing:4px;">
     </div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="verifyAuth()">로그인</button>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="login-btn">로그인</button>
   </div>
 </div>
 
@@ -123,8 +115,8 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <span class="db-status err" id="db-status-badge">DB 연결 중…</span>
-      <a href="index.html" class="btn">← 메인으로 돌아가기</a>
+      <span class="db-badge connecting" id="db-badge">DB 연결 중…</span>
+      <a href="index.html" class="btn">← 메인으로</a>
     </div>
   </div>
 </header>
@@ -134,6 +126,7 @@ tbody tr:last-child td { border-bottom: none; }
   <p class="page-sub">아모텍에서 공급받은 원료 파우더를 등록·관리합니다. 등록된 원료는 메인 페이지의 데이터 입력 시 dropdown으로 선택됩니다.</p>
 
   <div class="layout">
+    <!-- 등록 폼 -->
     <div class="section">
       <div class="section-header">
         <span class="section-num">+</span>
@@ -141,8 +134,8 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="field-group">
         <div class="field">
-          <span class="label">원료명 <span class="required">*</span></span>
-          <select class="select" id="mat-name" onchange="autoGenerateId()">
+          <span class="label">원료명 <span class="req">*</span></span>
+          <select class="select" id="mat-name" onchange="autoId()">
             <option value="">— 선택 —</option>
             <option value="유전체">유전체</option>
             <option value="내부전극 Metal">내부전극 Metal</option>
@@ -151,12 +144,12 @@ tbody tr:last-child td { border-bottom: none; }
           </select>
         </div>
         <div class="field">
-          <span class="label">공급 받은 날짜 <span class="required">*</span></span>
-          <input class="input" type="date" id="mat-date" onchange="autoGenerateId()">
+          <span class="label">공급 받은 날짜 <span class="req">*</span></span>
+          <input class="input" type="date" id="mat-date" onchange="autoId()">
         </div>
         <div class="field">
-          <span class="label">입도 <span class="unit">nm</span> <span class="required">*</span></span>
-          <input class="input" type="number" step="any" id="mat-size" placeholder="100" oninput="autoGenerateId()">
+          <span class="label">입도 <span class="unit">nm</span> <span class="req">*</span></span>
+          <input class="input" type="number" step="any" id="mat-size" placeholder="100" oninput="autoId()">
         </div>
         <div class="field">
           <span class="label">원료 ID (자동 생성)</span>
@@ -169,23 +162,21 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
-    <div>
-      <div class="table-wrap">
-        <div class="table-toolbar">
-          <span class="count" id="mat-count">0개 원료 등록됨</span>
-          <input class="input search" type="search" placeholder="ID, 원료명 검색…" oninput="renderList(this.value)">
-          <button class="btn btn-sm" onclick="exportCSV()">CSV 내보내기</button>
-        </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead>
-              <tr>
-                <th>원료 ID</th><th>원료명</th><th>공급일</th><th class="align-center">입도 (nm)</th><th class="align-center">등록일시</th><th></th>
-              </tr>
-            </thead>
-            <tbody id="mat-tbody"></tbody>
-          </table>
-        </div>
+    <!-- 목록 -->
+    <div class="tbl-wrap">
+      <div class="tbl-toolbar">
+        <span class="cnt" id="mat-cnt">0개 원료 등록됨</span>
+        <input class="input srch" type="search" placeholder="ID, 원료명 검색…" oninput="renderList(this.value)">
+        <button class="btn btn-sm" onclick="exportCSV()">CSV 내보내기</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>원료 ID</th><th>원료명</th><th>공급일</th>
+            <th class="ac">입도 (nm)</th><th class="ac">등록일시</th><th></th>
+          </tr></thead>
+          <tbody id="mat-tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -194,109 +185,155 @@ tbody tr:last-child td { border-bottom: none; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Supabase 설정 (index.html과 동일하게 교체) ──
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';  // ← 교체
-const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY';              // ← 교체
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ════════════════════════════════════════════════
+   Admin — localStorage 기본 + Supabase 동기화
+   index.html과 동일한 SB_URL/SB_KEY를 입력하세요
+   ════════════════════════════════════════════════ */
+const SB_URL = 'https://YOUR_PROJECT.supabase.co';
+const SB_KEY = 'YOUR_ANON_PUBLIC_KEY';
+const LS_KEY = 'mlcc.materials';
 
-// 인증
-function verifyAuth(){
-  if(document.getElementById('admin-pw').value==='0405'){
-    document.getElementById('auth-overlay').style.display='none';
-    init();
-  } else { toast('비밀번호가 일치하지 않습니다.','danger'); }
+let sb = null, sbReady = false;
+
+/* ── 인증 (비동기와 무관하게 즉시 작동) ── */
+function verifyAuth() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === '0405') {
+    document.getElementById('auth-overlay').style.display = 'none';
+    initDb();   // 인증 후 DB 연결 시도
+    renderList();
+    document.getElementById('mat-date').valueAsDate = new Date();
+  } else {
+    toast('비밀번호가 일치하지 않습니다.', 'danger');
+  }
 }
-document.getElementById('admin-pw').addEventListener('keypress', e=>{ if(e.key==='Enter') verifyAuth(); });
+document.getElementById('login-btn').addEventListener('click', verifyAuth);
+document.getElementById('admin-pw').addEventListener('keypress', e => { if(e.key==='Enter') verifyAuth(); });
 
-async function init(){
-  // DB 상태 확인
+/* ── DB 초기화 (인증 후 호출) ── */
+async function initDb() {
+  if (SB_URL.includes('YOUR_PROJECT')) {
+    setBadge('err', 'Supabase 미설정 (로컬 저장)');
+    return;
+  }
+  setBadge('connecting', 'DB 연결 중…');
   try {
-    const {error} = await supabase.from('materials').select('id',{count:'exact',head:true});
-    const b=document.getElementById('db-status-badge');
-    if(error){ b.textContent='DB 연결 실패'; b.className='db-status err'; }
-    else { b.textContent='DB 연결됨'; b.className='db-status ok'; }
-  } catch(e){}
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    const { error } = await sb.from('materials').select('id', { count:'exact', head:true });
+    if (error) throw error;
+    sbReady = true;
+    setBadge('ok', 'DB 연결됨');
+    // Supabase → localStorage 동기화
+    const { data } = await sb.from('materials').select('*').order('created_at', { ascending:false });
+    if (data) { localStorage.setItem(LS_KEY, JSON.stringify(data)); renderList(); }
+  } catch(e) {
+    setBadge('err', 'DB 연결 실패 (로컬 저장)');
+  }
+}
+function setBadge(cls, txt) {
+  const b = document.getElementById('db-badge');
+  b.className = 'db-badge ' + cls;
+  b.textContent = txt;
+}
+
+/* ── localStorage 헬퍼 ── */
+function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } }
+function lsSet(arr) { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+
+/* ── 원료 ID 자동 생성 ── */
+function autoId() {
+  const name = document.getElementById('mat-name').value;
+  const dateStr = document.getElementById('mat-date').value;
+  const size = document.getElementById('mat-size').value;
+  const p1 = {유전체:'BT','내부전극 Metal':'MT','내부전극 BT 공재':'VD',외부전극:'NI'}[name] || '';
+  let p2 = '';
+  if (dateStr) {
+    const d = new Date(dateStr);
+    p2 = `${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  }
+  const p3 = size ? `${size}NM` : '';
+  document.getElementById('mat-id').value = (p1 && p2 && p3) ? `${p1}-${p2}-${p3}` : '';
+}
+
+/* ── 등록 ── */
+async function registerMaterial() {
+  const id = document.getElementById('mat-id').value;
+  const name = document.getElementById('mat-name').value;
+  const date = document.getElementById('mat-date').value;
+  const size = document.getElementById('mat-size').value;
+  if (!name || !date || !size) return toast('모든 필수 항목을 입력해 주세요.', 'danger');
+  if (!id) return toast('원료 ID가 생성되지 않았습니다.', 'danger');
+
+  const arr = lsGet();
+  if (arr.find(m => m.id === id)) return toast(`이미 존재하는 원료 ID: ${id}`, 'danger');
+
+  const row = { id, name, supply_date:date, particle_size_nm:Number(size), created_at:new Date().toISOString() };
+  arr.unshift(row);
+  lsSet(arr);
+
+  // Supabase에도 저장
+  if (sbReady) {
+    const { error } = await sb.from('materials').insert(row);
+    if (error) console.warn('Supabase insert 실패:', error.message);
+  }
+
+  toast(`등록 완료 · ${id}`, 'success');
+  resetForm();
   renderList();
-  document.getElementById('mat-date').valueAsDate=new Date();
 }
 
-function autoGenerateId(){
-  const name=document.getElementById('mat-name').value;
-  const dateStr=document.getElementById('mat-date').value;
-  const size=document.getElementById('mat-size').value;
-  let p1='';
-  if(name==='유전체') p1='BT';
-  else if(name==='내부전극 Metal') p1='MT';
-  else if(name==='내부전극 BT 공재') p1='VD';
-  else if(name==='외부전극') p1='NI';
-  let p2='';
-  if(dateStr){ const d=new Date(dateStr); const yy=String(d.getFullYear()).slice(-2); const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); p2=`${yy}${mm}${dd}`; }
-  const p3=size?`${size}NM`:'';
-  document.getElementById('mat-id').value=(p1&&p2&&p3)?`${p1}-${p2}-${p3}`:'';
+/* ── 삭제 ── */
+async function deleteMaterial(id) {
+  if (!confirm(`원료 ${id}를 삭제하시겠습니까?\n\n메인 페이지 참조가 깨질 수 있습니다.`)) return;
+  lsSet(lsGet().filter(m => m.id !== id));
+  if (sbReady) await sb.from('materials').delete().eq('id', id);
+  toast('삭제 완료', 'success');
+  renderList();
 }
 
-async function registerMaterial(){
-  const id=document.getElementById('mat-id').value;
-  const name=document.getElementById('mat-name').value;
-  const date=document.getElementById('mat-date').value;
-  const size=document.getElementById('mat-size').value;
-  if(!name||!date||!size) return toast('모든 필수 항목을 입력해 주세요.','danger');
-  if(!id) return toast('원료 ID가 생성되지 않았습니다.','danger');
-  // 중복 체크
-  const {data:existing}=await supabase.from('materials').select('id').eq('id',id);
-  if(existing&&existing.length>0) return toast(`이미 존재하는 원료 ID: ${id}`,'danger');
-  const {error}=await supabase.from('materials').insert({id,name,supply_date:date,particle_size_nm:Number(size),created_at:new Date().toISOString()});
-  if(error) return toast('저장 실패: '+error.message,'danger');
-  toast(`등록 완료 · ${id}`,'success');
-  resetForm(); renderList();
+/* ── 초기화 ── */
+function resetForm() {
+  document.getElementById('mat-name').value = '';
+  document.getElementById('mat-size').value = '';
+  document.getElementById('mat-id').value = '';
+  document.getElementById('mat-date').valueAsDate = new Date();
 }
 
-function resetForm(){
-  ['mat-id','mat-size'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('mat-name').value='';
-  document.getElementById('mat-date').valueAsDate=new Date();
-  document.getElementById('mat-id').value='';
+/* ── 목록 렌더 ── */
+function renderList(filter = '') {
+  const arr = lsGet();
+  const f = filter.toLowerCase();
+  const filtered = f ? arr.filter(m => m.id.toLowerCase().includes(f) || m.name.toLowerCase().includes(f)) : arr;
+  document.getElementById('mat-cnt').textContent = `${filtered.length}개 원료 등록됨`;
+  const tbody = document.getElementById('mat-tbody');
+  tbody.innerHTML = filtered.length
+    ? filtered.map(m => `
+        <tr>
+          <td class="cell-id">${m.id}</td>
+          <td><span class="badge">${m.name}</span></td>
+          <td class="cell-num">${m.supply_date}</td>
+          <td class="cell-num">${m.particle_size_nm}</td>
+          <td class="cell-num" style="font-size:11px;color:var(--text-muted);">${(m.created_at||'').slice(0,10)}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button></td>
+        </tr>`).join('')
+    : `<tr><td colspan="6"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>등록된 원료가 없습니다</div></td></tr>`;
 }
 
-async function deleteMaterial(id){
-  if(!confirm(`원료 ${id}를 삭제하시겠습니까?\n\n메인 페이지 참조가 깨질 수 있습니다.`)) return;
-  const {error}=await supabase.from('materials').delete().eq('id',id);
-  if(error) return toast('삭제 실패','danger');
-  toast('삭제 완료','success'); renderList();
+/* ── CSV 내보내기 ── */
+function exportCSV() {
+  const arr = lsGet();
+  if (!arr.length) return toast('등록된 원료가 없습니다.', 'danger');
+  const h = ['id','name','supply_date','particle_size_nm','created_at'];
+  const rows = arr.map(m => h.map(k => `"${String(m[k]??'').replace(/"/g,'""')}"`).join(','));
+  const b = new Blob(['\ufeff' + [h.join(','),...rows].join('\n')], {type:'text/csv'});
+  const u = URL.createObjectURL(b), a = document.createElement('a');
+  a.href=u; a.download='materials.csv'; a.click(); URL.revokeObjectURL(u);
 }
 
-async function renderList(filter=''){
-  const {data:materials}=await supabase.from('materials').select('*').order('created_at',{ascending:false});
-  const arr=materials||[];
-  const f=filter.toLowerCase();
-  const filtered=f?arr.filter(m=>m.id.toLowerCase().includes(f)||m.name.toLowerCase().includes(f)):arr;
-  const tbody=document.getElementById('mat-tbody');
-  document.getElementById('mat-count').textContent=`${filtered.length}개 원료 등록됨`;
-  if(!filtered.length){ tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>등록된 원료가 없습니다</div></td></tr>`; return; }
-  tbody.innerHTML=filtered.map(m=>`
-    <tr>
-      <td class="cell-id">${m.id}</td>
-      <td><span class="badge">${m.name}</span></td>
-      <td class="cell-num">${m.supply_date}</td>
-      <td class="cell-num">${m.particle_size_nm}</td>
-      <td class="cell-num" style="font-size:11px;color:var(--text-muted)">${(m.created_at||'').slice(0,10)}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button></td>
-    </tr>`).join('');
-}
-
-async function exportCSV(){
-  const {data:materials}=await supabase.from('materials').select('*').order('created_at',{ascending:false});
-  if(!materials?.length) return toast('등록된 원료가 없습니다.','danger');
-  const headers=['id','name','supply_date','particle_size_nm','created_at'];
-  const rows=materials.map(m=>headers.map(h=>`"${String(m[h]??'').replace(/"/g,'""')}"`).join(','));
-  const csv=[headers.join(','),...rows].join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='materials.csv'; a.click(); URL.revokeObjectURL(url);
-}
-
-function toast(msg,type=''){
-  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type;
-  setTimeout(()=>t.className='toast',3000);
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
 }
 </script>
 </body>
