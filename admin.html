@@ -10,44 +10,533 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* 원본 CSS 그대로 유지 */
 :root {
-  --bg: #faf8f3; --surface: #ffffff; --surface-muted: #f3f1ea;
-  --border: #e6e3d8; --border-strong: #d4d0c2;
-  --text-primary: #1a1f2e; --text-secondary: #5a6478; --text-muted: #8a92a5;
-  --accent: #2d6a4f; --accent-hover: #1b4332; --accent-light: #d8f3dc; --accent-soft: #f0f8f3;
-  --danger: #b3341f; --warning: #b45309;
+  --bg: #faf8f3;
+  --surface: #ffffff;
+  --surface-muted: #f3f1ea;
+  --border: #e6e3d8;
+  --border-strong: #d4d0c2;
+  --text-primary: #1a1f2e;
+  --text-secondary: #5a6478;
+  --text-muted: #8a92a5;
+  --accent: #2d6a4f;
+  --accent-hover: #1b4332;
+  --accent-light: #d8f3dc;
+  --accent-soft: #f0f8f3;
+  --danger: #b3341f;
+  --warning: #b45309;
+
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: var(--font-body); font-size: 14px; line-height: 1.55; color: var(--text-primary); background: var(--bg); -webkit-font-smoothing: antialiased; }
-body { background-image: radial-gradient(circle at 20% 0%, rgba(45,106,79,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 100%, rgba(180,83,9,0.03) 0%, transparent 50%); min-height: 100vh; }
-.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 40px; }
-.header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+
+html, body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(45,106,79,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(180,83,9,0.03) 0%, transparent 50%);
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 40px;
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
 .brand { display: flex; align-items: center; gap: 14px; }
-.brand-logo { width: 44px; height: 44px; background: var(--accent); color: white; border-radius: 8px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -0.5px; box-shadow: 0 2px 8px rgba(45,106,79,0.25); }
-.brand-text h1 { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -0.6px; line-height: 1.1; }
-.brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; letter-spacing: 0.2px; }
-.admin-badge { display: inline-block; padding: 2px 8px; background: var(--warning); color: white; font-size: 10px; font-weight: 600; border-radius: 3px; letter-spacing: 1px; text-transform: uppercase; margin-left: 8px; vertical-align: middle; }
-.btn { font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.brand-logo {
+  width: 44px; height: 44px;
+  background: var(--accent); color: white;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 18px; letter-spacing: -0.5px;
+  box-shadow: 0 2px 8px rgba(45,106,79,0.25);
+}
+.brand-text h1 {
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 22px;
+  letter-spacing: -0.6px; line-height: 1.1;
+}
+.brand-text p {
+  font-size: 12px; color: var(--text-secondary);
+  margin-top: 2px; letter-spacing: 0.2px;
+}
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--warning);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
 .btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
 .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn-danger { color: var(--danger); border-color: transparent; background: transparent; }
 .btn-danger:hover { background: rgba(179,52,31,0.08); }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
-.main { max-width: 1200px; margin: 0 auto; padding: 32px 40px 80px; }
-.page-title { font-family: var(--font-display); font-size: 28px; font-weight: 600; letter-spacing: -0.6px; margin-bottom: 6px; }
-.page-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+
+/* Main */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 40px 80px;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600;
+  letter-spacing: -0.6px; margin-bottom: 6px;
+}
+.page-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+}
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
-.section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px 28px; }
-.section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed var(--border); }
-.section-num { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--accent); }
-.section-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px 28px;
+}
+.section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+.section-num {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 500; color: var(--accent);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 600; letter-spacing: -0.3px;
+}
+.section-hint { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+/* Form */
 .field-group { display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
-.label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.2px; }
-.label .unit { font-family: var(--font-mono); font-size: 10px;
+.label {
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary); letter-spacing: 0.2px;
+}
+.label .unit {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-muted); margin-left: 4px; font-weight: 400;
+}
+.label .required { color: var(--danger); margin-left: 2px; }
+.input, .select {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-primary);
+  width: 100%;
+  transition: all 0.15s ease;
+}
+.input:focus, .select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.input.mono { font-family: var(--font-mono); font-size: 12px; }
+.input[readonly] { background: var(--surface-muted); color: var(--text-secondary); cursor: not-allowed; }
+.select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%235a6478' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.field-help { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+.actions-bar {
+  display: flex; gap: 10px; justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+/* Table */
+.table-toolbar {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface-muted);
+  border-radius: 10px 10px 0 0;
+}
+.table-toolbar .count {
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--text-secondary);
+}
+.table-toolbar .search { flex: 1; max-width: 280px; margin-left: auto; }
+
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left;
+  font-weight: 600; font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+  white-space: nowrap;
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr { transition: background 0.1s ease; }
+tbody tr:hover { background: var(--accent-soft); }
+tbody tr:last-child td { border-bottom: none; }
+.cell-id { font-family: var(--font-mono); font-size: 11px; color: var(--accent-hover); font-weight: 500; }
+.cell-num { font-family: var(--font-mono); font-feature-settings: "tnum"; text-align: right; }
+.empty-state {
+  padding: 60px 20px; text-align: center; color: var(--text-muted);
+}
+.empty-state-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px; font-weight: 500;
+  background: var(--accent-light); color: var(--accent-hover);
+}
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text-primary); color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  z-index: 200; opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.danger { background: var(--danger); }
+.toast.success { background: var(--accent); }
+
+.info-card {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-light);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--accent-hover);
+  line-height: 1.6;
+}
+.info-card strong { font-weight: 600; }
+.info-card code {
+  font-family: var(--font-mono);
+  background: white;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+/* Auth Overlay CSS */
+#auth-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center; z-index: 9999;
+}
+.auth-box {
+  background: var(--surface); padding: 40px; border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; width: 340px;
+  border: 1px solid var(--border);
+}
+.auth-box h2 { font-family: var(--font-display); color: var(--accent); margin-bottom: 8px; font-size: 20px; }
+.auth-box p { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h2>Admin Login</h2>
+    <p>관리자 비밀번호를 입력하세요.</p>
+    <div class="field" style="margin-bottom:20px;">
+      <input type="password" id="admin-pw" class="input" placeholder="비밀번호" style="text-align:center; letter-spacing:4px;">
+    </div>
+    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="verifyAuth()">로그인</button>
+  </div>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">GS</div>
+      <div class="brand-text">
+        <h1>GreenSheet Lab<span class="admin-badge">관리자</span></h1>
+        <p>원료 ID 관리 페이지</p>
+      </div>
+    </div>
+    <a href="index.html" class="btn">← 메인으로 돌아가기</a>
+  </div>
+</header>
+
+<main class="main">
+  <h2 class="page-title">원료 ID 관리</h2>
+  <p class="page-sub">아모텍에서 공급받은 원료 파우더를 등록·관리합니다. 등록된 원료는 메인 페이지의 데이터 입력 시 dropdown으로 선택됩니다.</p>
+
+  <div class="layout">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">+</span>
+        <span class="section-title">신규 원료 등록</span>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <span class="label">원료명 <span class="required">*</span></span>
+          <select class="select" id="mat-name" onchange="autoGenerateId()">
+            <option value="">— 선택 —</option>
+            <option value="유전체">유전체</option>
+            <option value="내부전극 Metal">내부전극 Metal</option>
+            <option value="내부전극 BT 공재">내부전극 BT 공재</option>
+            <option value="외부전극">외부전극</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="label">공급 받은 날짜 <span class="required">*</span></span>
+          <input class="input" type="date" id="mat-date" onchange="autoGenerateId()">
+        </div>
+        <div class="field">
+          <span class="label">입도 <span class="unit">nm</span> <span class="required">*</span></span>
+          <input class="input mono" type="number" step="any" id="mat-size" placeholder="100" oninput="autoGenerateId()">
+          <span class="field-help">아모텍 측정값</span>
+        </div>
+        <div class="field">
+          <span class="label">원료 ID</span>
+          <input class="input mono" type="text" id="mat-id" readonly placeholder="자동으로 생성됩니다">
+        </div>
+      </div>
+      <div class="actions-bar">
+        <button class="btn" onclick="resetForm()">초기화</button>
+        <button class="btn btn-primary" onclick="registerMaterial()">등록</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <span class="count" id="mat-count">0개 원료 등록됨</span>
+          <input class="input search" type="search" placeholder="ID, 원료명 검색…" oninput="renderList(this.value)">
+          <button class="btn btn-sm" onclick="exportCSV()">CSV 내보내기</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>원료 ID</th>
+                <th>원료명</th>
+                <th>공급일</th>
+                <th>입도 (nm)</th>
+                <th>등록일시</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="mat-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 인증 로직
+function verifyAuth() {
+  if(document.getElementById('admin-pw').value === '0405') {
+    document.getElementById('auth-overlay').style.display = 'none';
+  } else {
+    toast('비밀번호가 일치하지 않습니다.', 'danger');
+  }
+}
+document.getElementById('admin-pw').addEventListener('keypress', function(e) { if(e.key === 'Enter') verifyAuth(); });
+
+const LS_KEY = 'mlcc.materials';
+
+function loadMaterials() {
+  return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+}
+function saveMaterials(arr) {
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+
+// 원료 ID 자동 생성 기능
+function autoGenerateId() {
+  const name = document.getElementById('mat-name').value;
+  const dateStr = document.getElementById('mat-date').value;
+  const size = document.getElementById('mat-size').value;
+  
+  let p1 = '';
+  if (name === '유전체') p1 = 'BT';
+  else if (name === '내부전극 Metal') p1 = 'MT';
+  else if (name === '내부전극 BT 공재') p1 = 'VD';
+  else if (name === '외부전극') p1 = 'NI';
+
+  let p2 = '';
+  if (dateStr) {
+    const d = new Date(dateStr);
+    const yy = String(d.getFullYear()).slice(-2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    p2 = `${yy}${mm}${dd}`;
+  }
+
+  const p3 = size ? `${size}NM` : '';
+
+  if (p1 && p2 && p3) {
+    document.getElementById('mat-id').value = `${p1}-${p2}-${p3}`;
+  } else {
+    document.getElementById('mat-id').value = '';
+  }
+}
+
+function registerMaterial() {
+  const id = document.getElementById('mat-id').value;
+  const name = document.getElementById('mat-name').value;
+  const date = document.getElementById('mat-date').value;
+  const size = document.getElementById('mat-size').value;
+
+  if (!name || !date || !size) return toast('모든 필수 항목을 입력해 주세요.', 'danger');
+  if (!id) return toast('원료 ID가 완전히 생성되지 않았습니다.', 'danger');
+
+  const materials = loadMaterials();
+  if (materials.find(m => m.id === id)) {
+    return toast(`이미 존재하는 원료 ID입니다: ${id}`, 'danger');
+  }
+
+  materials.push({
+    id,
+    name,
+    supply_date: date,
+    particle_size_nm: Number(size),
+    registered_at: new Date().toISOString()
+  });
+  saveMaterials(materials);
+  toast(`등록 완료 · ${id}`, 'success');
+  resetForm();
+  renderList();
+}
+
+function resetForm() {
+  ['mat-id', 'mat-name', 'mat-date', 'mat-size'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mat-date').valueAsDate = new Date();
+}
+
+function deleteMaterial(id) {
+  if (!confirm(`원료 ${id}를 삭제하시겠습니까?\n\n메인 페이지에서 해당 ID 참조가 깨질 수 있습니다.`)) return;
+  saveMaterials(loadMaterials().filter(m => m.id !== id));
+  toast('삭제 완료', 'success');
+  renderList();
+}
+
+function renderList(filter = '') {
+  const materials = loadMaterials().sort((a, b) => b.registered_at.localeCompare(a.registered_at));
+  const f = filter.toLowerCase();
+  const filtered = f ? materials.filter(m => m.id.toLowerCase().includes(f) || m.name.toLowerCase().includes(f)) : materials;
+  const tbody = document.getElementById('mat-tbody');
+  document.getElementById('mat-count').textContent = `${filtered.length}개 원료 등록됨`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div>등록된 원료가 없습니다</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(m => `
+    <tr>
+      <td class="cell-id">${m.id}</td>
+      <td><span class="badge">${m.name}</span></td>
+      <td class="cell-num">${m.supply_date}</td>
+      <td class="cell-num">${m.particle_size_nm}</td>
+      <td class="cell-num" style="font-size:11px;color:var(--text-muted)">${m.registered_at.slice(0,10)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button></td>
+    </tr>
+  `).join('');
+}
+
+function exportCSV() {
+  const materials = loadMaterials();
+  if (!materials.length) return toast('등록된 원료가 없습니다.', 'danger');
+  const headers = ['id', 'name', 'supply_date', 'particle_size_nm', 'registered_at'];
+  const rows = materials.map(m => headers.map(h => `"${String(m[h] ?? '').replace(/"/g, '""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'materials.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+document.getElementById('mat-date').valueAsDate = new Date();
+renderList();
+</script>
+
+</body>
+</html>
