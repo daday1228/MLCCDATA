@@ -600,7 +600,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 <div class="toast" id="toast"></div>
 
-<script>
+<>
 /* ========================================================================
    GreenSheet Lab — MLCC 데이터 플랫폼
    Supabase Cloud DB 연동 초기화
@@ -611,6 +611,8 @@ const supabaseUrl = 'https://dchzajfgxldaxcmgwnvt.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjaHphamZneGxkYXhjbWd3bnZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ND...'; // 본인 대시보드의 Publishable key를 전부 붙여넣기 하세요.
 
 // 통신 객체 생성 (앞으로 로컬 스토리지 대신 이 객체를 통해 DB에 접근합니다)
+const supabaseUrl = 'https://dchzajfgxldaxcmgwnvt.supabase.co';
+const supabaseKey = '여기에 아까 대시보드에서 복사한 Publishable key를 따옴표 안에 넣으세요';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 const LS = { MATERIALS: 'mlcc.materials', PSD: 'mlcc.psd_records', MECH: 'mlcc.mech_records', METRICS: 'mlcc.metrics', PLAN: 'mlcc.plan' };
