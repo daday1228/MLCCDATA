@@ -504,11 +504,10 @@ function registerMaterial() {
   }
 
   materials.push({
-    id,
-    name,
-    supply_date: date,
-    particle_size_nm: Number(size),
-    registered_at: new Date().toISOString()
+    id: matId,
+    name: matName,
+    date: matDate,
+    size: matSize
   });
   saveMaterials(materials);
   toast(`등록 완료 · ${id}`, 'success');
