@@ -75,6 +75,37 @@ function renderTodos() {
 
 window.addEventListener('load', renderTodos);
 
+
+function syncMaterialDropdowns() {
+  const materials = JSON.parse(
+    localStorage.getItem('greensheetlab_v2.materials') || '[]'
+  );
+
+  const selects = [
+    document.getElementById('psd-material-id'),
+    document.getElementById('mech-material-id')
+  ];
+
+  selects.forEach(select => {
+    if (!select) return;
+
+    const current = select.value;
+
+    select.innerHTML =
+      '<option value="">— 원료 선택 —</option>' +
+      materials.map(m => `
+        <option value="${m.id}">
+          ${m.id} (${m.name})
+        </option>
+      `).join('');
+
+    select.value = current;
+  });
+}
+
+window.addEventListener('storage', syncMaterialDropdowns);
+window.addEventListener('load', syncMaterialDropdowns);
+
 </script>
 <style>
 :root {
@@ -2082,6 +2113,37 @@ function renderTodos() {
 }
 
 window.addEventListener('load', renderTodos);
+
+
+function syncMaterialDropdowns() {
+  const materials = JSON.parse(
+    localStorage.getItem('greensheetlab_v2.materials') || '[]'
+  );
+
+  const selects = [
+    document.getElementById('psd-material-id'),
+    document.getElementById('mech-material-id')
+  ];
+
+  selects.forEach(select => {
+    if (!select) return;
+
+    const current = select.value;
+
+    select.innerHTML =
+      '<option value="">— 원료 선택 —</option>' +
+      materials.map(m => `
+        <option value="${m.id}">
+          ${m.id} (${m.name})
+        </option>
+      `).join('');
+
+    select.value = current;
+  });
+}
+
+window.addEventListener('storage', syncMaterialDropdowns);
+window.addEventListener('load', syncMaterialDropdowns);
 
 </script>
 
