@@ -723,17 +723,76 @@ tbody tr:last-child td { border-bottom: none; }
 <!-- ===== Tabs ===== -->
 <nav class="tabs-nav">
   <div class="tabs-nav-inner">
-    <button class="tab-btn active" data-tab="psd-input"><span class="tab-num">01</span>입도 데이터 입력</button>
-    <button class="tab-btn" data-tab="psd-list"><span class="tab-num">02</span>입도 데이터 목록</button>
-    <button class="tab-btn" data-tab="mech-input"><span class="tab-num">03</span>물성 데이터 입력</button>
-    <button class="tab-btn" data-tab="mech-list"><span class="tab-num">04</span>물성 데이터 목록</button>
-    <button class="tab-btn" data-tab="viz"><span class="tab-num">05</span>시각화</button>
-    <button class="tab-btn" data-tab="completion"><span class="tab-num">06</span>현재 완성도</button>
+    <button class="tab-btn active" data-tab="plan"><span class="tab-num">01</span>실험 계획 관리</button>
+    <button class="tab-btn" data-tab="psd"><span class="tab-num">02</span>입도 데이터</button>
+    <button class="tab-btn" data-tab="mech"><span class="tab-num">03</span>물성 데이터</button>
+    <button class="tab-btn" data-tab="viz"><span class="tab-num">04</span>시각화</button>
+    <button class="tab-btn" data-tab="completion"><span class="tab-num">05</span>현재 완성도</button>
   </div>
 </nav>
 
 <main class="main">
+<section class="tab-content active" id="tab-plan">
+  <h2 class="page-title">실험 계획 관리</h2>
+  <p class="page-sub">실험 일정 및 To-do 협업 관리</p>
 
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">실험 일정 등록</span>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="field">
+        <span class="label">실험명</span>
+        <input class="input" id="todo-title">
+      </div>
+
+      <div class="field">
+        <span class="label">담당자</span>
+        <input class="input" id="todo-owner">
+      </div>
+
+      <div class="field">
+        <span class="label">예정일</span>
+        <input class="input" type="date" id="todo-date">
+      </div>
+
+      <div class="field">
+        <span class="label">상태</span>
+        <select class="select" id="todo-status">
+          <option value="예정">예정</option>
+          <option value="진행중">진행중</option>
+          <option value="완료">완료</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn btn-primary" onclick="addTodo()">실험 등록</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="count" id="todo-count">0개 일정</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>완료</th>
+          <th>실험명</th>
+          <th>담당자</th>
+          <th>예정일</th>
+          <th>상태</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="todo-tbody"></tbody>
+    </table>
+  </div>
+</section>
   <!-- ============ TAB 1: 입도 데이터 입력 ============ -->
   <section class="tab-content active" id="tab-psd-input">
     <h2 class="page-title">입도 데이터 입력</h2>
