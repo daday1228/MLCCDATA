@@ -293,6 +293,20 @@ tbody tr:last-child td { border-bottom: none; }
 </head>
 <body>
 
+<div id="admin-lock" style="position:fixed;inset:0;background:white;z-index:9999;display:flex;align-items:center;justify-content:center;">
+<div style="width:340px;padding:32px;border:1px solid #ddd;border-radius:12px;background:white;">
+<h2 style="margin-bottom:20px">관리자 인증</h2>
+
+<input type="password" id="admin-password" placeholder="비밀번호 입력"
+style="width:100%;padding:12px;margin-bottom:12px">
+
+<button onclick="unlockAdmin()" style="width:100%;padding:12px">
+접속
+</button>
+</div>
+</div>
+
+
 <header class="header">
   <div class="header-inner">
     <div class="brand">
@@ -326,7 +340,7 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="field-group">
         <div class="field">
           <span class="label">원료 ID <span class="required">*</span></span>
-          <input class="input mono" type="text" id="mat-id" placeholder="예: BT-260519-100NM" autocomplete="off">
+          <input class="input mono" type="text" id="mat-id" readonly placeholder="자동 생성됨">
           <span class="field-help">중복 불가 · 영문/숫자/하이픈 권장</span>
         </div>
         <div class="field">
@@ -386,7 +400,7 @@ tbody tr:last-child td { border-bottom: none; }
 <div class="toast" id="toast"></div>
 
 <script>
-const LS_KEY = 'mlcc.materials';
+const LS_KEY = 'greensheetlab_v2.materials';
 
 function loadMaterials() {
   return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
@@ -483,6 +497,49 @@ function toast(msg, type = '') {
 document.getElementById('mat-date').valueAsDate = new Date();
 
 renderList();
+</script>
+
+
+<script>
+function unlockAdmin() {
+  const pw = document.getElementById('admin-password').value;
+
+  if (pw === '0405') {
+    document.getElementById('admin-lock').style.display = 'none';
+  } else {
+    alert('비밀번호가 틀렸습니다.');
+  }
+}
+
+function generateMaterialId() {
+  const name = document.getElementById('mat-name')?.value;
+  const date = document.getElementById('mat-date')?.value;
+  const size = document.getElementById('mat-size')?.value;
+
+  let prefix = '';
+
+  if (name === '유전체') prefix = 'BT';
+  else if (name === '내부전극 Metal') prefix = 'MT';
+  else if (name === '내부전극 BT 공재') prefix = 'VD';
+  else if (name === '외부전극') prefix = 'NI';
+
+  if (!prefix || !date || !size) return;
+
+  const d = new Date(date);
+
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+
+  document.getElementById('mat-id').value =
+    `${prefix}-${yy}${mm}${dd}-${size}NM`;
+}
+
+window.addEventListener('load', () => {
+  document.getElementById('mat-name')?.addEventListener('change', generateMaterialId);
+  document.getElementById('mat-date')?.addEventListener('change', generateMaterialId);
+  document.getElementById('mat-size')?.addEventListener('input', generateMaterialId);
+});
 </script>
 
 </body>

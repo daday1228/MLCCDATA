@@ -9,7 +9,73 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js">
+function loadTodos() {
+  return JSON.parse(localStorage.getItem(LS.TODO) || '[]');
+}
+
+function saveTodos(arr) {
+  localStorage.setItem(LS.TODO, JSON.stringify(arr));
+}
+
+function addTodo() {
+  const arr = loadTodos();
+
+  arr.push({
+    id: Date.now(),
+    title: document.getElementById('todo-title').value,
+    owner: document.getElementById('todo-owner').value,
+    date: document.getElementById('todo-date').value,
+    status: document.getElementById('todo-status').value,
+    done: false
+  });
+
+  saveTodos(arr);
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const arr = loadTodos();
+  const t = arr.find(v => v.id === id);
+
+  if (!t) return;
+
+  t.done = !t.done;
+
+  if (t.done) t.status = '완료';
+
+  saveTodos(arr);
+  renderTodos();
+}
+
+function removeTodo(id) {
+  saveTodos(loadTodos().filter(v => v.id !== id));
+  renderTodos();
+}
+
+function renderTodos() {
+  const arr = loadTodos();
+
+  const body = document.getElementById('todo-tbody');
+  if (!body) return;
+
+  document.getElementById('todo-count').textContent = `${arr.length}개 일정`;
+
+  body.innerHTML = arr.map(v => `
+    <tr>
+      <td><input type="checkbox" ${v.done ? 'checked' : ''} onchange="toggleTodo(${v.id})"></td>
+      <td>${v.title}</td>
+      <td>${v.owner}</td>
+      <td>${v.date}</td>
+      <td>${v.status}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeTodo(${v.id})">삭제</button></td>
+    </tr>
+  `).join('');
+}
+
+window.addEventListener('load', renderTodos);
+
+</script>
 <style>
 :root {
   --bg: #faf8f3;
@@ -724,77 +790,80 @@ tbody tr:last-child td { border-bottom: none; }
 <nav class="tabs-nav">
   <div class="tabs-nav-inner">
     <button class="tab-btn active" data-tab="plan"><span class="tab-num">01</span>실험 계획 관리</button>
-    <button class="tab-btn" data-tab="psd"><span class="tab-num">02</span>입도 데이터</button>
-    <button class="tab-btn" data-tab="mech"><span class="tab-num">03</span>물성 데이터</button>
+    <button class="tab-btn" data-tab="psd-input"><span class="tab-num">02</span>입도 데이터</button>
+    <button class="tab-btn" data-tab="mech-input"><span class="tab-num">03</span>물성 데이터</button>
     <button class="tab-btn" data-tab="viz"><span class="tab-num">04</span>시각화</button>
     <button class="tab-btn" data-tab="completion"><span class="tab-num">05</span>현재 완성도</button>
   </div>
 </nav>
 
 <main class="main">
+
+  
 <section class="tab-content active" id="tab-plan">
-  <h2 class="page-title">실험 계획 관리</h2>
-  <p class="page-sub">실험 일정 및 To-do 협업 관리</p>
+<h2 class="page-title">실험 계획 관리</h2>
+<p class="page-sub">실험 일정 / To-do / 담당자 체크 관리</p>
 
-  <div class="section">
-    <div class="section-header">
-      <span class="section-num">01</span>
-      <span class="section-title">실험 일정 등록</span>
-    </div>
+<div class="section">
+<div class="section-header">
+<span class="section-num">01</span>
+<span class="section-title">실험 일정 등록</span>
+</div>
 
-    <div class="grid grid-4">
-      <div class="field">
-        <span class="label">실험명</span>
-        <input class="input" id="todo-title">
-      </div>
+<div class="grid grid-4">
+<div class="field">
+<span class="label">실험명</span>
+<input class="input" id="todo-title">
+</div>
 
-      <div class="field">
-        <span class="label">담당자</span>
-        <input class="input" id="todo-owner">
-      </div>
+<div class="field">
+<span class="label">담당자</span>
+<input class="input" id="todo-owner">
+</div>
 
-      <div class="field">
-        <span class="label">예정일</span>
-        <input class="input" type="date" id="todo-date">
-      </div>
+<div class="field">
+<span class="label">예정일</span>
+<input class="input" type="date" id="todo-date">
+</div>
 
-      <div class="field">
-        <span class="label">상태</span>
-        <select class="select" id="todo-status">
-          <option value="예정">예정</option>
-          <option value="진행중">진행중</option>
-          <option value="완료">완료</option>
-        </select>
-      </div>
-    </div>
+<div class="field">
+<span class="label">상태</span>
+<select class="select" id="todo-status">
+<option value="예정">예정</option>
+<option value="진행중">진행중</option>
+<option value="완료">완료</option>
+</select>
+</div>
+</div>
 
-    <div class="actions-bar">
-      <button class="btn btn-primary" onclick="addTodo()">실험 등록</button>
-    </div>
-  </div>
+<div class="actions-bar">
+<button class="btn btn-primary" onclick="addTodo()">실험 등록</button>
+</div>
+</div>
 
-  <div class="table-wrap">
-    <div class="table-toolbar">
-      <span class="count" id="todo-count">0개 일정</span>
-    </div>
+<div class="table-wrap">
+<div class="table-toolbar">
+<span class="count" id="todo-count">0개 일정</span>
+</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>완료</th>
-          <th>실험명</th>
-          <th>담당자</th>
-          <th>예정일</th>
-          <th>상태</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="todo-tbody"></tbody>
-    </table>
-  </div>
+<table>
+<thead>
+<tr>
+<th>완료</th>
+<th>실험명</th>
+<th>담당자</th>
+<th>예정일</th>
+<th>상태</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="todo-tbody"></tbody>
+</table>
+</div>
 </section>
-  <!-- ============ TAB 1: 입도 데이터 입력 ============ -->
-  <section class="tab-content active" id="tab-psd-input">
+
+<!-- ============ TAB 1: 입도 데이터 입력 ============ -->
+  <section class="tab-content" id="tab-psd-input">
     <h2 class="page-title">입도 데이터 입력</h2>
     <p class="page-sub">원료 입도 · DLS(분급 후) · SEM(분산 후) 측정 결과를 입력합니다.</p>
 
@@ -879,18 +948,33 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
-    <!-- 실험 메타 -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-num">04</span>
-        <span class="section-title">실험 메타데이터</span>
-      </div>
-      <div class="grid grid-3">
-        <div class="field"><span class="label">실험일</span><input class="input" type="date" id="psd-exp-date"></div>
-        <div class="field"><span class="label">실험자</span><input class="input" type="text" id="psd-experimenter" placeholder="이름"></div>
-        <div class="field"><span class="label">비고</span><input class="input" type="text" id="psd-note" placeholder="(선택)"></div>
-      </div>
-    </div>
+    
+<div class="section">
+<div class="section-header">
+<span class="section-num">04</span>
+<span class="section-title">DLS 메타데이터</span>
+</div>
+
+<div class="grid grid-3">
+<div class="field"><span class="label">DLS 실험일</span><input class="input" type="date" id="dls-exp-date"></div>
+<div class="field"><span class="label">DLS 실험자</span><input class="input" type="text" id="dls-experimenter"></div>
+<div class="field"><span class="label">DLS 비고</span><input class="input" type="text" id="dls-note"></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-header">
+<span class="section-num">05</span>
+<span class="section-title">SEM 메타데이터</span>
+</div>
+
+<div class="grid grid-3">
+<div class="field"><span class="label">SEM 실험일</span><input class="input" type="date" id="sem-exp-date"></div>
+<div class="field"><span class="label">SEM 실험자</span><input class="input" type="text" id="sem-experimenter"></div>
+<div class="field"><span class="label">SEM 비고</span><input class="input" type="text" id="sem-note"></div>
+</div>
+</div>
+
 
     <div class="actions-bar">
       <button class="btn" onclick="resetPsdForm()">초기화</button>
@@ -1147,11 +1231,14 @@ tbody tr:last-child td { border-bottom: none; }
    localStorage 기반, 단일 페이지 SPA
    ======================================================================== */
 
+const STORAGE_PREFIX = 'greensheetlab_v2';
+
 const LS = {
-  MATERIALS: 'mlcc.materials',
-  PSD: 'mlcc.psd_records',
-  MECH: 'mlcc.mech_records',
-  METRICS: 'mlcc.metrics'
+  MATERIALS: `${STORAGE_PREFIX}.materials`,
+  PSD: `${STORAGE_PREFIX}.psd_records`,
+  MECH: `${STORAGE_PREFIX}.mech_records`,
+  METRICS: `${STORAGE_PREFIX}.metrics`,
+  TODO: `${STORAGE_PREFIX}.todos`
 };
 
 // ===== Data Layer =====
@@ -1930,6 +2017,72 @@ window.addEventListener('storage', e => {
 });
 
 refreshAll();
+
+function loadTodos() {
+  return JSON.parse(localStorage.getItem(LS.TODO) || '[]');
+}
+
+function saveTodos(arr) {
+  localStorage.setItem(LS.TODO, JSON.stringify(arr));
+}
+
+function addTodo() {
+  const arr = loadTodos();
+
+  arr.push({
+    id: Date.now(),
+    title: document.getElementById('todo-title').value,
+    owner: document.getElementById('todo-owner').value,
+    date: document.getElementById('todo-date').value,
+    status: document.getElementById('todo-status').value,
+    done: false
+  });
+
+  saveTodos(arr);
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const arr = loadTodos();
+  const t = arr.find(v => v.id === id);
+
+  if (!t) return;
+
+  t.done = !t.done;
+
+  if (t.done) t.status = '완료';
+
+  saveTodos(arr);
+  renderTodos();
+}
+
+function removeTodo(id) {
+  saveTodos(loadTodos().filter(v => v.id !== id));
+  renderTodos();
+}
+
+function renderTodos() {
+  const arr = loadTodos();
+
+  const body = document.getElementById('todo-tbody');
+  if (!body) return;
+
+  document.getElementById('todo-count').textContent = `${arr.length}개 일정`;
+
+  body.innerHTML = arr.map(v => `
+    <tr>
+      <td><input type="checkbox" ${v.done ? 'checked' : ''} onchange="toggleTodo(${v.id})"></td>
+      <td>${v.title}</td>
+      <td>${v.owner}</td>
+      <td>${v.date}</td>
+      <td>${v.status}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeTodo(${v.id})">삭제</button></td>
+    </tr>
+  `).join('');
+}
+
+window.addEventListener('load', renderTodos);
+
 </script>
 
 </body>
