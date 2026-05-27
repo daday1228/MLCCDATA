@@ -518,8 +518,8 @@ tbody tr:last-child td{border-bottom:none;}
    ★ Supabase URL과 KEY를 아래에 입력하세요.
      미입력 시 localStorage 단독으로 정상 동작합니다.
    ════════════════════════════════════════════════════════ */
-const SB_URL = 'https://dchzajfgxldaxcmgwnvt.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjaHphamZneGxkYXhjbWd3bnZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDEyMzAsImV4cCI6MjA5NDgxNzIzMH0.7DgwP5RFvxGjYvhCMJZ47qX8qkbMe8Ik05L6KIF04XM';
+const SB_URL = 'https://YOUR_PROJECT.supabase.co';
+const SB_KEY = 'YOUR_ANON_PUBLIC_KEY';
 
 // ── Supabase 초기화 (URL 미설정 시 비활성) ──
 let sb = null;
@@ -547,50 +547,68 @@ function setBadge(cls, txt) {
   b.textContent = txt;
 }
 
-// ── localStorage 키 ──
-const LS = {
-  MAT: 'mlcc.materials',
-  PSD: 'mlcc.psd_records',
-  MECH: 'mlcc.mech_records',
-  PLAN: 'mlcc.plan',
-  METRICS: 'mlcc.metrics'
-};
+// ── localStorage 키 (metrics만 로컬 사용) ──
+const LS = { METRICS: 'mlcc.metrics' };
 
-// ── 로컬 CRUD ──
-function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } }
-function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+// ── 데이터 읽기: Supabase 우선, 실패 시 로컬 캐시 ──
+const CACHE = { materials:'mlcc.c.mat', psd_records:'mlcc.c.psd', mech_records:'mlcc.c.mech', plan:'mlcc.c.plan' };
+function cGet(table) { try { return JSON.parse(localStorage.getItem(CACHE[table]) || '[]'); } catch { return []; } }
+function cSet(table, val) { try { localStorage.setItem(CACHE[table], JSON.stringify(val)); } catch {} }
 
-// ── Supabase → localStorage 동기화 ──
-async function syncFromSupabase() {
-  if (!sbReady) return;
-  const tables = [
-    { table:'materials', key: LS.MAT },
-    { table:'psd_records', key: LS.PSD },
-    { table:'mech_records', key: LS.MECH },
-    { table:'plan', key: LS.PLAN }
-  ];
-  for (const { table, key } of tables) {
-    const { data } = await sb.from(table).select('*').order('created_at', { ascending:false });
-    if (data) lsSet(key, data);
+async function dbAll(table) {
+  if (sbReady) {
+    const { data, error } = await sb.from(table).select('*').order('created_at', { ascending:false });
+    if (!error && data) { cSet(table, data); return data; }
   }
-  refreshKpi();
-  refreshMatDropdowns();
+  return cGet(table);
 }
 
-// ── 저장 (로컬 + Supabase) ──
+// ── 저장 (Supabase 우선 + 캐시 갱신) ──
 async function dbInsert(key, table, row) {
-  const arr = lsGet(key);
-  const exists = arr.findIndex(r => r.id === row.id);
-  if (exists >= 0) arr[exists] = row; else arr.unshift(row);
-  lsSet(key, arr);
+  // 캐시 업데이트
+  const arr = cGet(table);
+  const idx = arr.findIndex(r => r.id === row.id);
+  if (idx >= 0) arr[idx] = row; else arr.unshift(row);
+  cSet(table, arr);
+  // Supabase 저장
   if (sbReady) {
     const { error } = await sb.from(table).upsert(row);
     if (error) console.warn('Supabase upsert 실패:', error.message);
   }
 }
 async function dbDelete(key, table, id) {
-  lsSet(key, lsGet(key).filter(r => r.id !== id));
+  cSet(table, cGet(table).filter(r => r.id !== id));
   if (sbReady) await sb.from(table).delete().eq('id', id);
+}
+
+function lsGet(key) {
+  // key가 테이블명 캐시키면 캐시에서, metrics는 직접
+  const tableMap = {
+    'mlcc.materials':'materials', 'mlcc.psd_records':'psd_records',
+    'mlcc.mech_records':'mech_records', 'mlcc.plan':'plan'
+  };
+  if (tableMap[key]) return cGet(tableMap[key]);
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+}
+function lsSet(key, val) {
+  const tableMap = {
+    'mlcc.materials':'materials', 'mlcc.psd_records':'psd_records',
+    'mlcc.mech_records':'mech_records', 'mlcc.plan':'plan'
+  };
+  if (tableMap[key]) cSet(tableMap[key], val);
+  else localStorage.setItem(key, JSON.stringify(val));
+}
+const LS = {
+  MAT: 'mlcc.materials', PSD: 'mlcc.psd_records',
+  MECH: 'mlcc.mech_records', PLAN: 'mlcc.plan'
+};
+  if (!sbReady) return;
+  for (const table of ['materials','psd_records','mech_records','plan']) {
+    const { data } = await sb.from(table).select('*').order('created_at', { ascending:false });
+    if (data) cSet(table, data);
+  }
+  refreshKpi();
+  refreshMatDropdowns();
 }
 
 // ════ TABS ════
