@@ -287,6 +287,9 @@ tbody tr:last-child td{border-bottom:none;}
           <div class="field"><span class="label">원료명</span><span class="val empty" id="af-name">—</span></div>
           <div class="field"><span class="label">공급일</span><span class="val empty" id="af-date">—</span></div>
           <div class="field"><span class="label">입도 <span class="unit">nm</span></span><span class="val empty" id="af-size">—</span></div>
+          <div class="field"><span class="label">g</span><span class="val empty" id="af-gram">—</span></div>
+          <div class="field"><span class="label">ml</span><span class="val empty" id="af-ml">—</span></div>
+          <div class="field"><span class="label">비고</span><span class="val empty" id="af-note">—</span></div>
         </div>
       </div>
       <div class="section">
@@ -670,11 +673,19 @@ async function toggleTodo(id){
 async function deleteTodo(id){ await dbDelete(LS.PLAN,'plan',id); renderCalendar(); }
 
 // ════ MATERIAL DROPDOWNS ════
+function materialName(name){
+  return {
+    '유전체':'[유전체] BT',
+    '내부전극 Metal':'[내부전극] Ni',
+    '내부전극 BT 공재':'[내부전극] BT 공재',
+    '외부전극':'[외부전극] Cu'
+  }[name] || name || '';
+}
 function refreshMatDropdowns(){
   const mats=lsGet(LS.MAT);
   ['psd-mat-id','mech-mat-id'].forEach(id=>{
     const sel=document.getElementById(id), cur=sel.value;
-    sel.innerHTML='<option value="">— 원료를 선택하세요 —</option>'+mats.map(m=>`<option value="${m.id}">${m.id} · ${m.name}</option>`).join('');
+    sel.innerHTML='<option value="">— 원료를 선택하세요 —</option>'+mats.map(m=>`<option value="${m.id}">${m.id} · ${materialName(m.name)}</option>`).join('');
     if(cur&&mats.find(m=>m.id===cur))sel.value=cur;
   });
 }
@@ -683,7 +694,8 @@ function stripId(s){return s.replace(/[-_\s]/g,'');}
 function onPsdMat(){
   const mid=document.getElementById('psd-mat-id').value, m=lsGet(LS.MAT).find(x=>x.id===mid);
   const set=(id,val)=>{const el=document.getElementById(id);el.textContent=val||'—';el.className='val'+(val?'':' empty');};
-  set('af-name',m?.name);set('af-date',m?.supply_date);set('af-size',m?m.particle_size_nm+' nm':'');
+  set('af-name',materialName(m?.name));set('af-date',m?.supply_date);set('af-size',m?m.particle_size_nm+' nm':'');
+  set('af-gram',m?.amount_g!=null?m.amount_g+' g':'');set('af-ml',m?.volume_ml!=null?m.volume_ml+' ml':'');set('af-note',m?.note);
   const rd=document.getElementById('dls-date').value||new Date().toISOString().split('T')[0];
   document.getElementById('psd-id-preview').textContent=mid?`PSD-${ymd(rd)}-${stripId(mid)}-XX`:'PSD-YYYYMMDD-{원료}-XX';
 }
@@ -715,7 +727,7 @@ async function savePsd(){
   const m=lsGet(LS.MAT).find(x=>x.id===mid), dlsDate=document.getElementById('dls-date').value||new Date().toISOString().split('T')[0];
   const records=lsGet(LS.PSD); let id=editPsd;
   if(!id){const d=ymd(dlsDate),same=records.filter(r=>r.material_id===mid&&r.id.includes(d)),seq=String(same.length+1).padStart(2,'0');id=`PSD-${d}-${stripId(mid)}-${seq}`;}
-  const row={id,material_id:mid,created_at:new Date().toISOString(),raw_material:{name:m?.name,supply_date:m?.supply_date,particle_size_nm:m?.particle_size_nm},dls:{date:dlsDate,experimenter:document.getElementById('dls-exp').value,note:document.getElementById('dls-note').value,q10:numOrNull('dls-q10'),q50:numOrNull('dls-q50'),q90:numOrNull('dls-q90'),peak:numOrNull('dls-peak'),mean:numOrNull('dls-mean'),pdi:numOrNull('dls-pdi'),image:imgs.dls},sem:{date:document.getElementById('sem-date').value,experimenter:document.getElementById('sem-exp').value,note:document.getElementById('sem-note').value,q10:numOrNull('sem-q10'),q50:numOrNull('sem-q50'),q90:numOrNull('sem-q90'),span:numOrNull('sem-span'),image:imgs.sem}};
+  const row={id,material_id:mid,created_at:new Date().toISOString(),raw_material:{name:materialName(m?.name),supply_date:m?.supply_date,particle_size_nm:m?.particle_size_nm,amount_g:m?.amount_g??null,volume_ml:m?.volume_ml??null,note:m?.note??null},dls:{date:dlsDate,experimenter:document.getElementById('dls-exp').value,note:document.getElementById('dls-note').value,q10:numOrNull('dls-q10'),q50:numOrNull('dls-q50'),q90:numOrNull('dls-q90'),peak:numOrNull('dls-peak'),mean:numOrNull('dls-mean'),pdi:numOrNull('dls-pdi'),image:imgs.dls},sem:{date:document.getElementById('sem-date').value,experimenter:document.getElementById('sem-exp').value,note:document.getElementById('sem-note').value,q10:numOrNull('sem-q10'),q50:numOrNull('sem-q50'),q90:numOrNull('sem-q90'),span:numOrNull('sem-span'),image:imgs.sem}};
   await dbInsert(LS.PSD,'psd_records',row);
   toast(editPsd?'수정 완료':`저장 완료 · ${id}`,'success');
   editPsd=null;resetPsd();switchSub('psd','list');renderPsdList();refreshKpi();
@@ -728,7 +740,7 @@ function resetPsd(){
 function renderPsdList(filter=''){
   const recs=lsGet(LS.PSD),f=filter.toLowerCase(),filtered=f?recs.filter(r=>r.id.toLowerCase().includes(f)||r.material_id.toLowerCase().includes(f)):recs;
   const tbody=document.getElementById('psd-tbody');document.getElementById('psd-cnt').textContent=`${filtered.length}개 레코드`;
-  tbody.innerHTML=filtered.length?filtered.map(r=>`<tr onclick="showPsdDetail('${r.id}')" style="cursor:pointer;"><td class="cell-id">${r.id}</td><td class="cell-id">${r.material_id}</td><td><span class="badge">${r.raw_material?.name||'—'}</span></td><td class="cell-num">${r.dls?.date||'—'}</td><td class="cell-num">${r.sem?.date||'—'}</td><td class="cell-num">${r.dls?.q50??'—'}</td><td class="cell-num">${r.sem?.q50??'—'}</td><td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delPsd('${r.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>저장된 레코드가 없습니다</div></td></tr>`;
+  tbody.innerHTML=filtered.length?filtered.map(r=>`<tr onclick="showPsdDetail('${r.id}')" style="cursor:pointer;"><td class="cell-id">${r.id}</td><td class="cell-id">${r.material_id}</td><td><span class="badge">${materialName(r.raw_material?.name)||'—'}</span></td><td class="cell-num">${r.dls?.date||'—'}</td><td class="cell-num">${r.sem?.date||'—'}</td><td class="cell-num">${r.dls?.q50??'—'}</td><td class="cell-num">${r.sem?.q50??'—'}</td><td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delPsd('${r.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>저장된 레코드가 없습니다</div></td></tr>`;
 }
 async function delPsd(id){if(confirm('삭제하시겠습니까?')){await dbDelete(LS.PSD,'psd_records',id);renderPsdList();refreshKpi();}}
 
@@ -759,7 +771,7 @@ async function delMech(id){if(confirm('삭제하시겠습니까?')){await dbDele
 function showPsdDetail(id){
   const r=lsGet(LS.PSD).find(x=>x.id===id);if(!r)return;
   document.getElementById('modal-ttl').textContent=r.id;
-  document.getElementById('modal-bd').innerHTML=`<div class="d-sec">원료 특성</div><div class="d-grid"><div class="d-lbl">원료 ID</div><div class="d-val">${r.material_id}</div><div class="d-lbl">원료명</div><div class="d-val">${r.raw_material?.name||'—'}</div></div><div class="d-sec">DLS</div>${r.dls?.image?`<img src="${r.dls.image}" style="max-width:100%;border-radius:6px;margin-bottom:12px;border:1px solid var(--border);">`:''}<div class="d-grid"><div class="d-lbl">실험일/실험자</div><div class="d-val">${r.dls?.date||'—'} / ${r.dls?.experimenter||'—'}</div><div class="d-lbl">Q10/Q50/Q90</div><div class="d-val">${r.dls?.q10??'—'} / ${r.dls?.q50??'—'} / ${r.dls?.q90??'—'} nm</div><div class="d-lbl">PDI</div><div class="d-val">${r.dls?.pdi??'—'}</div></div><div class="d-sec">SEM</div>${r.sem?.image?`<img src="${r.sem.image}" style="max-width:100%;border-radius:6px;margin-bottom:12px;border:1px solid var(--border);">`:''}<div class="d-grid"><div class="d-lbl">실험일/실험자</div><div class="d-val">${r.sem?.date||'—'} / ${r.sem?.experimenter||'—'}</div><div class="d-lbl">Q10/Q50/Q90</div><div class="d-val">${r.sem?.q10??'—'} / ${r.sem?.q50??'—'} / ${r.sem?.q90??'—'} nm</div><div class="d-lbl">Span</div><div class="d-val">${r.sem?.span??'—'}</div></div>`;
+  document.getElementById('modal-bd').innerHTML=`<div class="d-sec">원료 특성</div><div class="d-grid"><div class="d-lbl">원료 ID</div><div class="d-val">${r.material_id}</div><div class="d-lbl">원료명</div><div class="d-val">${materialName(r.raw_material?.name)||'—'}</div><div class="d-lbl">g</div><div class="d-val">${r.raw_material?.amount_g??'—'}</div><div class="d-lbl">ml</div><div class="d-val">${r.raw_material?.volume_ml??'—'}</div><div class="d-lbl">비고</div><div class="d-val">${r.raw_material?.note||'—'}</div></div><div class="d-sec">DLS</div>${r.dls?.image?`<img src="${r.dls.image}" style="max-width:100%;border-radius:6px;margin-bottom:12px;border:1px solid var(--border);">`:''}<div class="d-grid"><div class="d-lbl">실험일/실험자</div><div class="d-val">${r.dls?.date||'—'} / ${r.dls?.experimenter||'—'}</div><div class="d-lbl">Q10/Q50/Q90</div><div class="d-val">${r.dls?.q10??'—'} / ${r.dls?.q50??'—'} / ${r.dls?.q90??'—'} nm</div><div class="d-lbl">PDI</div><div class="d-val">${r.dls?.pdi??'—'}</div></div><div class="d-sec">SEM</div>${r.sem?.image?`<img src="${r.sem.image}" style="max-width:100%;border-radius:6px;margin-bottom:12px;border:1px solid var(--border);">`:''}<div class="d-grid"><div class="d-lbl">실험일/실험자</div><div class="d-val">${r.sem?.date||'—'} / ${r.sem?.experimenter||'—'}</div><div class="d-lbl">Q10/Q50/Q90</div><div class="d-val">${r.sem?.q10??'—'} / ${r.sem?.q50??'—'} / ${r.sem?.q90??'—'} nm</div><div class="d-lbl">Span</div><div class="d-val">${r.sem?.span??'—'}</div></div>`;
   const eb=document.getElementById('modal-edit-btn');eb.style.display='inline-block';eb.onclick=()=>loadEditPsd(id);
   document.getElementById('modal').classList.add('active');
 }
@@ -795,12 +807,12 @@ const PLYCFG={displayModeBar:false,responsive:true};
 function renderAllCharts(){renderChart1();renderChart2();renderChart3();renderChart4();renderChart5();renderChart6();}
 function renderChart1(){const psd=lsGet(LS.PSD);if(!psd.length)return document.getElementById('chart-1').innerHTML='<div class="chart-empty">입도 데이터가 없습니다</div>';const lb=psd.map(r=>r.id.replace(/^PSD-/,''));Plotly.newPlot('chart-1',[{name:'원료 입도',x:lb,y:psd.map(r=>r.raw_material?.particle_size_nm),type:'bar'},{name:'DLS Q50',x:lb,y:psd.map(r=>r.dls?.q50),type:'bar'},{name:'SEM Q50',x:lb,y:psd.map(r=>r.sem?.q50),type:'bar'}],{...PLY,barmode:'group',yaxis:{title:'nm',gridcolor:'#d0e4f5'},xaxis:{tickangle:-25},legend:{orientation:'h',y:-0.25}},PLYCFG);}
 function renderChart2(){const psd=lsGet(LS.PSD);if(!psd.length)return document.getElementById('chart-2').innerHTML='<div class="chart-empty">입도 데이터가 없습니다</div>';const tr=[...['q10','q50','q90'].map(k=>({label:'DLS '+k.toUpperCase(),vals:psd.map(r=>r.dls?.[k]).filter(v=>v!=null)})),...['q10','q50','q90'].map(k=>({label:'SEM '+k.toUpperCase(),vals:psd.map(r=>r.sem?.[k]).filter(v=>v!=null)}))].map(s=>({y:s.vals,name:s.label,type:'box',boxpoints:'all',jitter:.4,pointpos:0}));Plotly.newPlot('chart-2',tr,{...PLY,yaxis:{title:'nm',gridcolor:'#d0e4f5'},showlegend:false},PLYCFG);}
-function renderChart3(){const psd=lsGet(LS.PSD);if(!psd.length)return document.getElementById('chart-3').innerHTML='<div class="chart-empty">입도 데이터가 없습니다</div>';const g={};psd.forEach(r=>{const k=r.raw_material?.name||'미분류';if(!g[k])g[k]={pdi:[],span:[],lb:[]};g[k].pdi.push(r.dls?.pdi);g[k].span.push(r.sem?.span);g[k].lb.push(r.material_id);});const tr=[];Object.keys(g).forEach(k=>{tr.push({x:g[k].lb,y:g[k].pdi,name:`${k}·PDI`,mode:'markers',type:'scatter',marker:{size:10},yaxis:'y'});tr.push({x:g[k].lb,y:g[k].span,name:`${k}·Span`,mode:'markers',type:'scatter',marker:{size:10,symbol:'diamond'},yaxis:'y2'});});Plotly.newPlot('chart-3',tr,{...PLY,yaxis:{title:'PDI',gridcolor:'#d0e4f5'},yaxis2:{title:'Span',overlaying:'y',side:'right'},xaxis:{tickangle:-25},legend:{orientation:'h',y:-0.3}},PLYCFG);}
+function renderChart3(){const psd=lsGet(LS.PSD);if(!psd.length)return document.getElementById('chart-3').innerHTML='<div class="chart-empty">입도 데이터가 없습니다</div>';const g={};psd.forEach(r=>{const k=materialName(r.raw_material?.name)||'미분류';if(!g[k])g[k]={pdi:[],span:[],lb:[]};g[k].pdi.push(r.dls?.pdi);g[k].span.push(r.sem?.span);g[k].lb.push(r.material_id);});const tr=[];Object.keys(g).forEach(k=>{tr.push({x:g[k].lb,y:g[k].pdi,name:`${k}·PDI`,mode:'markers',type:'scatter',marker:{size:10},yaxis:'y'});tr.push({x:g[k].lb,y:g[k].span,name:`${k}·Span`,mode:'markers',type:'scatter',marker:{size:10,symbol:'diamond'},yaxis:'y2'});});Plotly.newPlot('chart-3',tr,{...PLY,yaxis:{title:'PDI',gridcolor:'#d0e4f5'},yaxis2:{title:'Span',overlaying:'y',side:'right'},xaxis:{tickangle:-25},legend:{orientation:'h',y:-0.3}},PLYCFG);}
 function renderChart4(){const mech=lsGet(LS.MECH);if(mech.length<3)return document.getElementById('chart-4').innerHTML='<div class="chart-empty">레코드 3개 이상 필요</div>';const keys=['roll_gap_um','roll_speed_rpm','temperature_c','feed_rate_g_min'],lb=['Gap','Speed','Temp','Feed'],data=keys.map(k=>mech.map(r=>r.process?.[k]).filter(v=>v!=null)),mx=keys.map((_,i)=>keys.map((_,j)=>pearson(data[i],data[j])));Plotly.newPlot('chart-4',[{z:mx,x:lb,y:lb,type:'heatmap',colorscale:[[0,'#c0392b'],[.5,'#f4f8fc'],[1,'#0099d9']],zmin:-1,zmax:1,text:mx.map(r=>r.map(v=>v.toFixed(2))),texttemplate:'%{text}'}],{...PLY},PLYCFG);}
 function pearson(a,b){const n=Math.min(a.length,b.length);if(n<2)return 0;const xs=a.slice(0,n),ys=b.slice(0,n),mx=xs.reduce((s,v)=>s+v,0)/n,my=ys.reduce((s,v)=>s+v,0)/n;let num=0,dx2=0,dy2=0;for(let i=0;i<n;i++){const dx=xs[i]-mx,dy=ys[i]-my;num+=dx*dy;dx2+=dx*dx;dy2+=dy*dy;}const den=Math.sqrt(dx2*dy2);return den===0?0:num/den;}
 function extractNum(t){const m=String(t||'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;}
 function renderChart5(){const mech=lsGet(LS.MECH);if(!mech.length)return document.getElementById('chart-5').innerHTML='<div class="chart-empty">물성 데이터가 없습니다</div>';const xk=document.getElementById('xy-x').value,yk=document.getElementById('xy-y').value,xl=document.getElementById('xy-x').selectedOptions[0].text,yl=document.getElementById('xy-y').selectedOptions[0].text,pts=mech.map(r=>({x:r.process?.[xk],y:extractNum(r.properties?.[yk]),lb:r.id})).filter(p=>p.x!=null&&p.y!=null);if(!pts.length)return document.getElementById('chart-5').innerHTML='<div class="chart-empty">수치 자동 추출 실패</div>';Plotly.newPlot('chart-5',[{x:pts.map(p=>p.x),y:pts.map(p=>p.y),text:pts.map(p=>p.lb),mode:'markers',type:'scatter',marker:{size:12,color:'#0099d9',opacity:.7}}],{...PLY,xaxis:{title:xl,gridcolor:'#d0e4f5'},yaxis:{title:yl,gridcolor:'#d0e4f5'}},PLYCFG);}
-function renderChart6(){const mech=lsGet(LS.MECH);if(!mech.length)return document.getElementById('chart-6').innerHTML='<div class="chart-empty">물성 데이터가 없습니다</div>';const mats=lsGet(LS.MAT),mm=Object.fromEntries(mats.map(m=>[m.id,m.name])),g={};mech.forEach(r=>{const n=mm[r.material_id]||'미분류';if(!g[n])g[n]=[];if(r.process?.roll_gap_um!=null)g[n].push(r.process.roll_gap_um)});const tr=Object.keys(g).map(k=>({y:g[k],name:k,type:'box',boxpoints:'all',jitter:.4}));if(!tr.length)return document.getElementById('chart-6').innerHTML='<div class="chart-empty">데이터 부족</div>';Plotly.newPlot('chart-6',tr,{...PLY,yaxis:{title:'Roll gap (µm)',gridcolor:'#d0e4f5'}},PLYCFG);}
+function renderChart6(){const mech=lsGet(LS.MECH);if(!mech.length)return document.getElementById('chart-6').innerHTML='<div class="chart-empty">물성 데이터가 없습니다</div>';const mats=lsGet(LS.MAT),mm=Object.fromEntries(mats.map(m=>[m.id,materialName(m.name)])),g={};mech.forEach(r=>{const n=mm[r.material_id]||'미분류';if(!g[n])g[n]=[];if(r.process?.roll_gap_um!=null)g[n].push(r.process.roll_gap_um)});const tr=Object.keys(g).map(k=>({y:g[k],name:k,type:'box',boxpoints:'all',jitter:.4}));if(!tr.length)return document.getElementById('chart-6').innerHTML='<div class="chart-empty">데이터 부족</div>';Plotly.newPlot('chart-6',tr,{...PLY,yaxis:{title:'Roll gap (µm)',gridcolor:'#d0e4f5'}},PLYCFG);}
 
 // ════ METRICS ════
 function dlMetricsSchema(){const s={metadata:{trained_at:"2026-05-19T10:00:00Z",model_type:"RandomForest",data_count:50},targets:{uniformity:{label:"필름 두께 균일도",r2:0.85,mae:0.12,rmse:0.18,predictions:[{actual:1.0,predicted:1.08}],feature_importance:{roll_gap_um:0.42}}},learning_curve:[{n_samples:10,r2_avg:0.42}]};const b=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='metrics_schema.json';a.click();URL.revokeObjectURL(u);toast('다운로드 완료','success');}

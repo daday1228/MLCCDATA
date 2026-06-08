@@ -137,10 +137,10 @@ tbody tr:last-child td{border-bottom:none;}
           <span class="label">원료명 <span class="req">*</span></span>
           <select class="select" id="mat-name" onchange="autoId()">
             <option value="">— 선택 —</option>
-            <option value="유전체">유전체</option>
-            <option value="내부전극 Metal">내부전극 Metal</option>
-            <option value="내부전극 BT 공재">내부전극 BT 공재</option>
-            <option value="외부전극">외부전극</option>
+            <option value="[유전체] BT">[유전체] BT</option>
+            <option value="[내부전극] Ni">[내부전극] Ni</option>
+            <option value="[내부전극] BT 공재">[내부전극] BT 공재</option>
+            <option value="[외부전극] Cu">[외부전극] Cu</option>
           </select>
         </div>
         <div class="field">
@@ -150,6 +150,18 @@ tbody tr:last-child td{border-bottom:none;}
         <div class="field">
           <span class="label">입도 <span class="unit">nm</span> <span class="req">*</span></span>
           <input class="input" type="number" step="any" id="mat-size" placeholder="100" oninput="autoId()">
+        </div>
+        <div class="field">
+          <span class="label">g <span class="unit">선택</span></span>
+          <input class="input" type="number" step="any" id="mat-gram" placeholder="입력 선택">
+        </div>
+        <div class="field">
+          <span class="label">ml <span class="unit">선택</span></span>
+          <input class="input" type="number" step="any" id="mat-ml" placeholder="입력 선택">
+        </div>
+        <div class="field">
+          <span class="label">비고 <span class="unit">선택</span></span>
+          <input class="input" type="text" id="mat-note" placeholder="비고 입력">
         </div>
         <div class="field">
           <span class="label">원료 ID (자동 생성)</span>
@@ -173,7 +185,7 @@ tbody tr:last-child td{border-bottom:none;}
         <table>
           <thead><tr>
             <th>원료 ID</th><th>원료명</th><th>공급일</th>
-            <th class="ac">입도 (nm)</th><th class="ac">등록일시</th><th></th>
+            <th class="ac">입도 (nm)</th><th class="ac">g</th><th class="ac">ml</th><th>비고</th><th class="ac">등록일시</th><th></th>
           </tr></thead>
           <tbody id="mat-tbody"></tbody>
         </table>
@@ -239,13 +251,30 @@ function setBadge(cls, txt) {
 /* ── localStorage 헬퍼 ── */
 function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } }
 function lsSet(arr) { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+function materialName(name) {
+  return {
+    '유전체':'[유전체] BT',
+    '내부전극 Metal':'[내부전극] Ni',
+    '내부전극 BT 공재':'[내부전극] BT 공재',
+    '외부전극':'[외부전극] Cu'
+  }[name] || name || '';
+}
 
 /* ── 원료 ID 자동 생성 ── */
 function autoId() {
   const name = document.getElementById('mat-name').value;
   const dateStr = document.getElementById('mat-date').value;
   const size = document.getElementById('mat-size').value;
-  const p1 = {유전체:'BT','내부전극 Metal':'MT','내부전극 BT 공재':'VD',외부전극:'NI'}[name] || '';
+  const p1 = {
+    '[유전체] BT':'BT',
+    '[내부전극] Ni':'NI',
+    '[내부전극] BT 공재':'VD',
+    '[외부전극] Cu':'CU',
+    유전체:'BT',
+    '내부전극 Metal':'NI',
+    '내부전극 BT 공재':'VD',
+    외부전극:'CU'
+  }[name] || '';
   let p2 = '';
   if (dateStr) {
     const d = new Date(dateStr);
@@ -261,13 +290,25 @@ async function registerMaterial() {
   const name = document.getElementById('mat-name').value;
   const date = document.getElementById('mat-date').value;
   const size = document.getElementById('mat-size').value;
+  const gram = document.getElementById('mat-gram').value;
+  const ml = document.getElementById('mat-ml').value;
+  const note = document.getElementById('mat-note').value.trim();
   if (!name || !date || !size) return toast('모든 필수 항목을 입력해 주세요.', 'danger');
   if (!id) return toast('원료 ID가 생성되지 않았습니다.', 'danger');
 
   const arr = lsGet();
   if (arr.find(m => m.id === id)) return toast(`이미 존재하는 원료 ID: ${id}`, 'danger');
 
-  const row = { id, name, supply_date:date, particle_size_nm:Number(size), created_at:new Date().toISOString() };
+  const row = {
+    id,
+    name,
+    supply_date:date,
+    particle_size_nm:Number(size),
+    amount_g: gram === '' ? null : Number(gram),
+    volume_ml: ml === '' ? null : Number(ml),
+    note: note || null,
+    created_at:new Date().toISOString()
+  };
   arr.unshift(row);
   lsSet(arr);
 
@@ -295,6 +336,9 @@ async function deleteMaterial(id) {
 function resetForm() {
   document.getElementById('mat-name').value = '';
   document.getElementById('mat-size').value = '';
+  document.getElementById('mat-gram').value = '';
+  document.getElementById('mat-ml').value = '';
+  document.getElementById('mat-note').value = '';
   document.getElementById('mat-id').value = '';
   document.getElementById('mat-date').valueAsDate = new Date();
 }
@@ -310,21 +354,24 @@ function renderList(filter = '') {
     ? filtered.map(m => `
         <tr>
           <td class="cell-id">${m.id}</td>
-          <td><span class="badge">${m.name}</span></td>
+          <td><span class="badge">${materialName(m.name)}</span></td>
           <td class="cell-num">${m.supply_date}</td>
           <td class="cell-num">${m.particle_size_nm}</td>
+          <td class="cell-num">${m.amount_g ?? '—'}</td>
+          <td class="cell-num">${m.volume_ml ?? '—'}</td>
+          <td>${m.note || '—'}</td>
           <td class="cell-num" style="font-size:11px;color:var(--text-muted);">${(m.created_at||'').slice(0,10)}</td>
           <td><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button></td>
         </tr>`).join('')
-    : `<tr><td colspan="6"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>등록된 원료가 없습니다</div></td></tr>`;
+    : `<tr><td colspan="9"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>등록된 원료가 없습니다</div></td></tr>`;
 }
 
 /* ── CSV 내보내기 ── */
 function exportCSV() {
   const arr = lsGet();
   if (!arr.length) return toast('등록된 원료가 없습니다.', 'danger');
-  const h = ['id','name','supply_date','particle_size_nm','created_at'];
-  const rows = arr.map(m => h.map(k => `"${String(m[k]??'').replace(/"/g,'""')}"`).join(','));
+  const h = ['id','name','supply_date','particle_size_nm','amount_g','volume_ml','note','created_at'];
+  const rows = arr.map(m => h.map(k => `"${String(k==='name'?materialName(m[k]):m[k]??'').replace(/"/g,'""')}"`).join(','));
   const b = new Blob(['\ufeff' + [h.join(','),...rows].join('\n')], {type:'text/csv'});
   const u = URL.createObjectURL(b), a = document.createElement('a');
   a.href=u; a.download='materials.csv'; a.click(); URL.revokeObjectURL(u);
