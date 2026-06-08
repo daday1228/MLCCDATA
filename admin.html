@@ -191,8 +191,6 @@ tbody tr:last-child td{border-bottom:none;}
           <option value="external">외부전극</option>
         </select>
         <select class="select filter-select" id="mat-sort" onchange="renderList()">
-          <option value="newest">최근 등록순</option>
-          <option value="oldest">오래된 등록순</option>
           <option value="supply-newest">공급일 최신순</option>
           <option value="supply-oldest">공급일 오래된순</option>
           <option value="name">원료명순</option>
@@ -486,7 +484,7 @@ function renderList() {
   const arr = lsGet();
   const f = (document.getElementById('mat-search')?.value || '').toLowerCase();
   const group = document.getElementById('mat-group-filter')?.value || 'all';
-  const sort = document.getElementById('mat-sort')?.value || 'newest';
+  const sort = document.getElementById('mat-sort')?.value || 'supply-newest';
 
   const filtered = arr
     .filter(m =>
@@ -498,11 +496,10 @@ function renderList() {
         materialName(m.name).toLowerCase().includes(f)
     )
     .sort((a, b) => {
-      if (sort === 'oldest') return String(a.created_at || '').localeCompare(String(b.created_at || ''));
       if (sort === 'supply-newest') return String(b.supply_date || '').localeCompare(String(a.supply_date || ''));
       if (sort === 'supply-oldest') return String(a.supply_date || '').localeCompare(String(b.supply_date || ''));
       if (sort === 'name') return materialName(a.name).localeCompare(materialName(b.name), 'ko');
-      return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+      return String(b.supply_date || '').localeCompare(String(a.supply_date || ''));
     });
 
   document.getElementById('mat-cnt').textContent = `${filtered.length}개 원료 등록됨`;
