@@ -20,7 +20,7 @@ html,body{font-family:var(--font);font-size:14px;line-height:1.6;color:var(--tex
 body{background-image:radial-gradient(circle at 15% 0%,rgba(0,153,217,.07) 0%,transparent 55%);min-height:100vh;}
 
 .header{background:var(--surface);border-bottom:2.5px solid var(--accent);padding:0 40px;box-shadow:0 2px 12px rgba(0,153,217,.08);}
-.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px;}
+.header-inner{max-width:1360px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px;}
 .brand{display:flex;align-items:center;gap:14px;}
 .brand-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--accent) 0%,#42bdd8 100%);color:#fff;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;line-height:1.2;text-align:center;box-shadow:0 4px 14px rgba(0,153,217,.35);}
 .brand-text h1{font-weight:700;font-size:16px;letter-spacing:-.3px;line-height:1.25;}
@@ -40,10 +40,10 @@ body{background-image:radial-gradient(circle at 15% 0%,rgba(0,153,217,.07) 0%,tr
 .btn-danger:hover{background:rgba(192,57,43,.07);}
 .btn-sm{padding:4px 10px;font-size:12px;}
 
-.main{max-width:1200px;margin:0 auto;padding:32px 40px 80px;}
+.main{max-width:1360px;margin:0 auto;padding:32px 40px 80px;}
 .page-title{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
 .page-sub{color:var(--text-secondary);font-size:13px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);}
-.layout{display:grid;grid-template-columns:380px 1fr;gap:24px;}
+.layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:24px;}
 @media(max-width:900px){.layout{grid-template-columns:1fr;}}
 
 .section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;}
@@ -69,13 +69,14 @@ table{width:100%;border-collapse:collapse;font-size:13px;}
 th{text-align:left;font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface-muted);white-space:nowrap;}
 th.ac{text-align:center;}
 td{padding:12px 14px;border-bottom:1px solid var(--border);}
+td.actions-cell{white-space:nowrap;}
 tbody tr{transition:background .1s;}
 tbody tr:hover{background:var(--accent-soft);}
 tbody tr:last-child td{border-bottom:none;}
 .cell-id{font-size:11px;color:var(--accent-hover);font-weight:600;}
 .cell-num{text-align:center;}
 .empty-st{padding:60px 20px;text-align:center;color:var(--text-muted);}
-.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-hover);}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-hover);white-space:nowrap;}
 
 .toast{position:fixed;bottom:24px;right:24px;background:var(--text-primary);color:#fff;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:200;opacity:0;transform:translateY(10px);transition:all .2s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
@@ -170,7 +171,7 @@ tbody tr:last-child td{border-bottom:none;}
       </div>
       <div class="actions-bar">
         <button class="btn" onclick="resetForm()">초기화</button>
-        <button class="btn btn-primary" onclick="registerMaterial()">등록</button>
+        <button class="btn btn-primary" id="btn-save-mat" onclick="registerMaterial()">등록</button>
       </div>
     </div>
 
@@ -206,6 +207,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const LS_KEY = 'mlcc.materials';
 
 let sb = null, sbReady = false;
+let editMaterialId = null;
 
 /* ── 인증 (비동기와 무관하게 즉시 작동) ── */
 function verifyAuth() {
@@ -297,7 +299,7 @@ async function registerMaterial() {
   if (!id) return toast('원료 ID가 생성되지 않았습니다.', 'danger');
 
   const arr = lsGet();
-  if (arr.find(m => m.id === id)) return toast(`이미 존재하는 원료 ID: ${id}`, 'danger');
+  if (arr.find(m => m.id === id && m.id !== editMaterialId)) return toast(`이미 존재하는 원료 ID: ${id}`, 'danger');
 
   const row = {
     id,
@@ -309,18 +311,44 @@ async function registerMaterial() {
     note: note || null,
     created_at:new Date().toISOString()
   };
-  arr.unshift(row);
+  if (editMaterialId) {
+    const old = arr.find(m => m.id === editMaterialId);
+    row.created_at = old?.created_at || row.created_at;
+    const idx = arr.findIndex(m => m.id === editMaterialId);
+    if (idx >= 0) arr[idx] = row;
+    else arr.unshift(row);
+  } else {
+    arr.unshift(row);
+  }
   lsSet(arr);
 
   // Supabase에도 저장
   if (sbReady) {
-    const { error } = await sb.from('materials').insert(row);
-    if (error) console.warn('Supabase insert 실패:', error.message);
+    if (editMaterialId && editMaterialId !== id) await sb.from('materials').delete().eq('id', editMaterialId);
+    const { error } = await sb.from('materials').upsert(row);
+    if (error) console.warn('Supabase 저장 실패:', error.message);
   }
 
-  toast(`등록 완료 · ${id}`, 'success');
+  toast(`${editMaterialId ? '수정' : '등록'} 완료 · ${id}`, 'success');
   resetForm();
   renderList();
+}
+
+function editMaterial(id) {
+  const m = lsGet().find(x => x.id === id);
+  if (!m) return;
+  editMaterialId = id;
+  document.getElementById('mat-name').value = materialName(m.name);
+  document.getElementById('mat-date').value = m.supply_date || '';
+  document.getElementById('mat-size').value = m.particle_size_nm ?? '';
+  document.getElementById('mat-gram').value = m.amount_g ?? '';
+  document.getElementById('mat-ml').value = m.volume_ml ?? '';
+  document.getElementById('mat-note').value = m.note || '';
+  document.getElementById('mat-id').value = m.id;
+  autoId();
+  document.getElementById('btn-save-mat').textContent = '수정 저장';
+  document.querySelector('.section-title').textContent = '원료 정보 수정';
+  document.querySelector('.section').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 /* ── 삭제 ── */
@@ -328,12 +356,14 @@ async function deleteMaterial(id) {
   if (!confirm(`원료 ${id}를 삭제하시겠습니까?\n\n메인 페이지 참조가 깨질 수 있습니다.`)) return;
   lsSet(lsGet().filter(m => m.id !== id));
   if (sbReady) await sb.from('materials').delete().eq('id', id);
+  if (editMaterialId === id) resetForm();
   toast('삭제 완료', 'success');
   renderList();
 }
 
 /* ── 초기화 ── */
 function resetForm() {
+  editMaterialId = null;
   document.getElementById('mat-name').value = '';
   document.getElementById('mat-size').value = '';
   document.getElementById('mat-gram').value = '';
@@ -341,13 +371,15 @@ function resetForm() {
   document.getElementById('mat-note').value = '';
   document.getElementById('mat-id').value = '';
   document.getElementById('mat-date').valueAsDate = new Date();
+  document.getElementById('btn-save-mat').textContent = '등록';
+  document.querySelector('.section-title').textContent = '신규 원료 등록';
 }
 
 /* ── 목록 렌더 ── */
 function renderList(filter = '') {
   const arr = lsGet();
   const f = filter.toLowerCase();
-  const filtered = f ? arr.filter(m => m.id.toLowerCase().includes(f) || m.name.toLowerCase().includes(f)) : arr;
+  const filtered = f ? arr.filter(m => m.id.toLowerCase().includes(f) || materialName(m.name).toLowerCase().includes(f)) : arr;
   document.getElementById('mat-cnt').textContent = `${filtered.length}개 원료 등록됨`;
   const tbody = document.getElementById('mat-tbody');
   tbody.innerHTML = filtered.length
@@ -361,7 +393,10 @@ function renderList(filter = '') {
           <td class="cell-num">${m.volume_ml ?? '—'}</td>
           <td>${m.note || '—'}</td>
           <td class="cell-num" style="font-size:11px;color:var(--text-muted);">${(m.created_at||'').slice(0,10)}</td>
-          <td><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button></td>
+          <td class="actions-cell">
+            <button class="btn btn-sm" onclick="editMaterial('${m.id}')">수정</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">삭제</button>
+          </td>
         </tr>`).join('')
     : `<tr><td colspan="9"><div class="empty-st"><div style="font-size:36px;opacity:.4;margin-bottom:8px;">📭</div>등록된 원료가 없습니다</div></td></tr>`;
 }
