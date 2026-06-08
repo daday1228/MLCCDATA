@@ -215,6 +215,7 @@ tbody tr:last-child td{border-bottom:none;}
 const SB_URL = 'https://dchzajfgxldaxcmgwnvt.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjaHphamZneGxkYXhjbWd3bnZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDEyMzAsImV4cCI6MjA5NDgxNzIzMH0.7DgwP5RFvxGjYvhCMJZ47qX8qkbMe8Ik05L6KIF04XM';
 const LS_KEY = 'mlcc.materials';
+const CACHE_MAT_KEY = 'mlcc.c.mat';
 
 let sb = null;
 let sbReady = false;
@@ -255,8 +256,19 @@ async function initDb() {
 
     const { data } = await sb.from('materials').select('*').order('created_at', { ascending:false });
     if (data) {
-      localStorage.setItem(LS_KEY, JSON.stringify(data));
+      const merged = mergeById(lsGet(), data);
+      lsSet(merged);
       renderList();
+
+      const localOnly = merged.filter(m => !data.some(d => d.id === m.id));
+      for (const row of localOnly) {
+        const { error: syncError } = await sb.from('materials').upsert(row, { onConflict:'id' });
+        if (syncError) {
+          console.error('Supabase 동기화 실패:', syncError);
+          toast('DB 컬럼 확인 필요: ' + syncError.message, 'danger');
+          break;
+        }
+      }
     }
   } catch(e) {
     setBadge('err', 'DB 연결 실패 (로컬 저장)');
@@ -271,7 +283,9 @@ function setBadge(cls, txt) {
 
 function lsGet() {
   try {
-    return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    const primary = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    const cache = JSON.parse(localStorage.getItem(CACHE_MAT_KEY) || '[]');
+    return mergeById(primary, cache);
   } catch {
     return [];
   }
@@ -279,6 +293,21 @@ function lsGet() {
 
 function lsSet(arr) {
   localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  localStorage.setItem(CACHE_MAT_KEY, JSON.stringify(arr));
+}
+
+function mergeById(localRows = [], remoteRows = []) {
+  const map = new Map();
+  [...remoteRows, ...localRows].forEach(row => {
+    if (!row?.id) return;
+    const prev = map.get(row.id);
+    map.set(row.id, {
+      ...(prev || {}),
+      ...row,
+      created_at: row.created_at || prev?.created_at || new Date().toISOString()
+    });
+  });
+  return [...map.values()].sort((a,b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
 }
 
 function materialName(name) {
@@ -367,8 +396,13 @@ async function registerMaterial() {
       await sb.from('materials').delete().eq('id', editMaterialId);
     }
 
-    const { error } = await sb.from('materials').upsert(row);
-    if (error) console.warn('Supabase 저장 실패:', error.message);
+    const { error } = await sb.from('materials').upsert(row, { onConflict:'id' });
+    if (error) {
+      console.error('Supabase 저장 실패:', error);
+      toast('로컬 저장됨 / DB 저장 실패: ' + error.message, 'danger');
+      renderList();
+      return;
+    }
   }
 
   toast(`${editMaterialId ? '수정' : '등록'} 완료 · ${id}`, 'success');
