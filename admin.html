@@ -65,6 +65,7 @@ body{background-image:radial-gradient(circle at 15% 0%,rgba(0,153,217,.07) 0%,tr
 .tbl-toolbar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface-muted);}
 .cnt{font-size:12px;color:var(--text-secondary);font-weight:600;}
 .srch{flex:1;max-width:280px;margin-left:auto;}
+.filter-select{width:auto;min-width:150px;background-color:#fff;}
 table{width:100%;min-width:980px;border-collapse:collapse;font-size:13px;}
 th{text-align:left;font-weight:700;font-size:11px;color:var(--text-secondary);letter-spacing:.6px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface-muted);white-space:nowrap;}
 th.ac{text-align:center;}
@@ -183,7 +184,20 @@ tbody tr:last-child td{border-bottom:none;}
     <div class="tbl-wrap">
       <div class="tbl-toolbar">
         <span class="cnt" id="mat-cnt">0개 원료 등록됨</span>
-        <input class="input srch" type="search" placeholder="ID, 원료명 검색..." oninput="renderList(this.value)">
+        <select class="select filter-select" id="mat-group-filter" onchange="renderList()">
+          <option value="all">전체 원료</option>
+          <option value="dielectric">유전체</option>
+          <option value="internal">내부전극</option>
+          <option value="external">외부전극</option>
+        </select>
+        <select class="select filter-select" id="mat-sort" onchange="renderList()">
+          <option value="newest">최근 등록순</option>
+          <option value="oldest">오래된 등록순</option>
+          <option value="supply-newest">공급일 최신순</option>
+          <option value="supply-oldest">공급일 오래된순</option>
+          <option value="name">원료명순</option>
+        </select>
+        <input class="input srch" id="mat-search" type="search" placeholder="ID, 원료명 검색..." oninput="renderList()">
         <button class="btn btn-sm" onclick="exportCSV()">CSV 내보내기</button>
       </div>
 
@@ -317,6 +331,14 @@ function materialName(name) {
     '내부전극 BT 공재':'[내부전극] BT 공재',
     '외부전극':'[외부전극] Cu'
   }[name] || name || '';
+}
+
+function materialGroup(name) {
+  const label = materialName(name);
+  if (label.includes('[유전체]')) return 'dielectric';
+  if (label.includes('[내부전극]')) return 'internal';
+  if (label.includes('[외부전극]')) return 'external';
+  return 'other';
 }
 
 function materialPrefix(name) {
@@ -460,16 +482,28 @@ function resetForm() {
   document.querySelector('.section-title').textContent = '신규 원료 등록';
 }
 
-function renderList(filter = '') {
+function renderList() {
   const arr = lsGet();
-  const f = filter.toLowerCase();
+  const f = (document.getElementById('mat-search')?.value || '').toLowerCase();
+  const group = document.getElementById('mat-group-filter')?.value || 'all';
+  const sort = document.getElementById('mat-sort')?.value || 'newest';
 
-  const filtered = f
-    ? arr.filter(m =>
+  const filtered = arr
+    .filter(m =>
+      group === 'all' || materialGroup(m.name) === group
+    )
+    .filter(m =>
+      !f ||
         m.id.toLowerCase().includes(f) ||
         materialName(m.name).toLowerCase().includes(f)
-      )
-    : arr;
+    )
+    .sort((a, b) => {
+      if (sort === 'oldest') return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+      if (sort === 'supply-newest') return String(b.supply_date || '').localeCompare(String(a.supply_date || ''));
+      if (sort === 'supply-oldest') return String(a.supply_date || '').localeCompare(String(b.supply_date || ''));
+      if (sort === 'name') return materialName(a.name).localeCompare(materialName(b.name), 'ko');
+      return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+    });
 
   document.getElementById('mat-cnt').textContent = `${filtered.length}개 원료 등록됨`;
 
